@@ -202,32 +202,24 @@ export const resolveComplaint = async (req, res) => {
   }
 };
 
-export const createGlobalNotification = async (req, res) => {
-  try {
-    const { title, message } = req.body;
-    // In a real app, this might broadcast via WebSockets. Here we just log it or save to a global feed.
-    // We will save it as a system notification where recipient is null (global)
-    const notification = await Notification.create({
-      recipient: null, // Note: Schema requires recipient, we might need to bypass or find all users
-      type: 'System',
-      title,
-      message
-    });
-    res.status(201).json(notification);
-  } catch (error) {
-    // If recipient is strictly required by mongoose schema, let's catch and do a manual loop or relax schema.
-    // Since we don't want to change schema right now, let's fetch all users and broadcast (simulate)
-    const users = await User.find({}).select('_id');
-    const notifications = users.map(u => ({
-      recipient: u._id,
-      type: 'System',
-      title,
-      message
-    }));
-    await Notification.insertMany(notifications);
-    res.status(201).json({ message: `Notification sent to ${users.length} users.` });
+export const createGlobalNotification = asyncHandler(async (req, res) => {
+  const { title, message } = req.body;
+  
+  const users = await User.find({}).select('_id');
+  if (users.length === 0) {
+    return res.status(201).json({ message: 'No users to notify.' });
   }
-};
+
+  const notifications = users.map(u => ({
+    recipient: u._id,
+    type: 'System',
+    title,
+    message
+  }));
+
+  await Notification.insertMany(notifications);
+  res.status(201).json({ message: `Notification sent to ${users.length} users.` });
+});
 
 export const getSettings = async (req, res) => {
   try {
