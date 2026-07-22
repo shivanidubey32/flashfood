@@ -1,10 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, ShieldAlert, ShieldCheck, FileText, CheckCircle2, Loader, Store } from 'lucide-react';
+import { Search, ShieldAlert, ShieldCheck, FileText, CheckCircle2, Loader, Store, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const RestaurantManagement = () => {
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Toast State
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
+  // Confirm Modal State
+  const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null, actionLabel: '' });
 
   const fetchMerchants = async () => {
     try {
@@ -23,34 +34,109 @@ const RestaurantManagement = () => {
     fetchMerchants();
   }, []);
 
-  const toggleVerification = async (merchantId, currentStatus) => {
-    if (!window.confirm(`Are you sure you want to ${currentStatus ? 'revoke verification for' : 'verify'} this Restaurant?`)) return;
-    
-    try {
-      const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/verify/${merchantId}`, {}, config);
-      fetchMerchants();
-    } catch (error) {
-      alert('Failed to update verification status');
-    }
+  const toggleVerification = (merchantId, currentStatus) => {
+    setConfirmModal({
+      show: true,
+      message: `Are you sure you want to ${currentStatus ? 'revoke verification for' : 'verify'} this Restaurant?`,
+      actionLabel: currentStatus ? 'Revoke' : 'Verify',
+      onConfirm: async () => {
+        setConfirmModal({ show: false, message: '', onConfirm: null, actionLabel: '' });
+        try {
+          const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
+          const config = { headers: { Authorization: `Bearer ${token}` } };
+          await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/verify/${merchantId}`, {}, config);
+          fetchMerchants();
+          showToast(`Restaurant successfully ${currentStatus ? 'unverified' : 'verified'}!`);
+        } catch (error) {
+          showToast('Failed to update verification status', 'error');
+        }
+      }
+    });
   };
 
-  const toggleBlockStatus = async (merchantId, currentStatus) => {
-    if (!window.confirm(`Are you sure you want to ${currentStatus ? 'unblock' : 'block'} this Restaurant?`)) return;
-    
-    try {
-      const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/block/${merchantId}`, {}, config);
-      fetchMerchants();
-    } catch (error) {
-      alert('Failed to update block status');
-    }
+  const toggleBlockStatus = (merchantId, currentStatus) => {
+    setConfirmModal({
+      show: true,
+      message: `Are you sure you want to ${currentStatus ? 'unblock' : 'suspend'} this Restaurant?`,
+      actionLabel: currentStatus ? 'Unblock' : 'Suspend',
+      onConfirm: async () => {
+        setConfirmModal({ show: false, message: '', onConfirm: null, actionLabel: '' });
+        try {
+          const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
+          const config = { headers: { Authorization: `Bearer ${token}` } };
+          await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/block/${merchantId}`, {}, config);
+          fetchMerchants();
+          showToast(`Restaurant successfully ${currentStatus ? 'unblocked' : 'suspended'}!`);
+        } catch (error) {
+          showToast('Failed to update block status', 'error');
+        }
+      }
+    });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full font-bold shadow-lg flex items-center space-x-2 ${
+              toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+            }`}
+          >
+            <CheckCircle2 className="w-5 h-5" />
+            <span>{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirm Modal */}
+      <AnimatePresence>
+        {confirmModal.show && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center"
+            >
+              <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Confirm Action</h3>
+              <p className="text-slate-500 mb-8">{confirmModal.message}</p>
+              
+              <div className="flex space-x-3">
+                <button 
+                  onClick={() => setConfirmModal({ show: false, message: '', onConfirm: null, actionLabel: '' })}
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmModal.onConfirm}
+                  className={`flex-1 py-3 text-white font-bold rounded-xl transition-colors shadow-lg ${
+                    confirmModal.actionLabel === 'Suspend' || confirmModal.actionLabel === 'Revoke' 
+                      ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30'
+                      : 'bg-green-500 hover:bg-green-600 shadow-green-500/30'
+                  }`}
+                >
+                  {confirmModal.actionLabel}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Restaurant Management</h1>
