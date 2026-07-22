@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, Database, Shield, Loader } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Database, Shield, Loader, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 const Settings = () => {
@@ -12,6 +13,13 @@ const Settings = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Toast Notification State
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -36,9 +44,9 @@ const Settings = () => {
       const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/admin/settings', settings, config);
-      alert('Settings saved successfully');
+      showToast('Settings saved successfully!');
     } catch (error) {
-      alert('Failed to save settings');
+      showToast('Failed to save settings', 'error');
     } finally {
       setSaving(false);
     }
@@ -49,7 +57,24 @@ const Settings = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl relative">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full font-bold shadow-lg flex items-center space-x-2 ${
+              toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+            }`}
+          >
+            <CheckCircle2 className="w-5 h-5" />
+            <span>{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Platform Settings</h1>
