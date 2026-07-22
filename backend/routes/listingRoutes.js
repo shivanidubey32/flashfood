@@ -4,7 +4,8 @@ import {
   getListingById,
   createListing,
   getMerchantListings,
-  updateListingStatus
+  updateListingStatus,
+  deleteMerchantListing
 } from '../controllers/listingController.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js';
 
@@ -16,6 +17,7 @@ router.route('/').get(getListings);
 router.route('/').post(protect, authorize('Merchant', 'Admin'), createListing);
 router.route('/merchant/my-listings').get(protect, authorize('Merchant', 'Admin'), getMerchantListings);
 router.route('/:id/status').put(protect, authorize('Merchant', 'Admin'), updateListingStatus);
+router.route('/:id').delete(protect, authorize('Merchant', 'Admin'), deleteMerchantListing);
 
 router.route('/:id').get(getListingById);
 

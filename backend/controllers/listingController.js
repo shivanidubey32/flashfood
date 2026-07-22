@@ -72,3 +72,17 @@ export const updateListingStatus = asyncHandler(async (req, res) => {
     throw new Error('Listing not found or unauthorized');
   }
 });
+
+// @desc    Delete a merchant's listing
+// @route   DELETE /api/listings/:id
+// @access  Private/Merchant
+export const deleteMerchantListing = asyncHandler(async (req, res) => {
+  const listing = await FoodListing.findById(req.params.id);
+  if (listing && listing.merchant.toString() === req.user._id.toString()) {
+    await listing.deleteOne();
+    res.json({ message: 'Listing removed successfully' });
+  } else {
+    res.status(404);
+    throw new Error('Listing not found or unauthorized');
+  }
+});

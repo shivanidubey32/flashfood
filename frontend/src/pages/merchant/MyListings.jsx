@@ -62,11 +62,18 @@ const MyListings = () => {
   const deleteListing = async (id) => {
     setConfirmModal({
       show: true,
-      message: 'Are you sure you want to delete this listing?',
-      onConfirm: () => {
-        setListings(listings.filter(l => l._id !== id));
-        showToast(`Listing removed locally.`);
-        setConfirmModal({ show: false, message: '', onConfirm: null });
+      message: 'Are you sure you want to delete this listing permanently?',
+      onConfirm: async () => {
+        try {
+          await API.delete(`/listings/${id}`);
+          setListings(listings.filter(l => l._id !== id));
+          showToast(`Listing deleted successfully.`);
+        } catch (error) {
+          console.error("Failed to delete listing", error);
+          showToast(`Failed to delete listing.`, 'error');
+        } finally {
+          setConfirmModal({ show: false, message: '', onConfirm: null });
+        }
       }
     });
   };
