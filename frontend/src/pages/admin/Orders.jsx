@@ -44,7 +44,7 @@ const Orders = () => {
         try {
           const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
           const config = { headers: { Authorization: `Bearer ${token}` } };
-          await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/orders/${orderId}`, { status: newStatus }, config);
+          await axios.put(`${import.meta.env.VITE_BACKEND_URL || (import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))}/api/admin/orders/${orderId}/status`, { status: newStatus }, config);
           fetchOrders();
           showToast(`Order marked as ${newStatus}!`);
         } catch (error) {
