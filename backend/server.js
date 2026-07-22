@@ -33,7 +33,10 @@ const io = new Server(server, {
 });
 
 // Security & Logging Middleware
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(helmet({ 
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false
+}));
 app.use(cors());
 if (process.env.NODE_ENV !== 'production') {
     app.use(morgan('dev'));
