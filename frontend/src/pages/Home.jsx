@@ -72,7 +72,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium"
           >
-            For over a year, we've enabled our customers to discover surplus food from top restaurants, delivered right to their hands at up to 70% off.
+            FlashFood helps customers discover surplus food from local restaurants, cafes, and stores at affordable prices while helping businesses reduce food waste and maximize their revenue.
           </motion.p>
           
           <motion.div 
