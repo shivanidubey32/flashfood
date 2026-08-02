@@ -1,71 +1,135 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, MapPin, Clock, Tag } from 'lucide-react';
+import { ArrowRight, MapPin, Tag, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div className="w-full">
+    <div className="w-full bg-white font-sans overflow-hidden">
       {/* Hero Section */}
-      <section className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100">
-        <div className="absolute inset-0 w-full h-full">
-          {/* Abstract background shapes */}
-          <div className="absolute top-20 left-10 w-72 h-72 bg-red-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
-          <div className="absolute top-40 right-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-40 w-72 h-72 bg-yellow-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-20">
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        {/* Background Sweeping SVG Lines */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <svg className="absolute w-full h-full" viewBox="0 0 1440 800" fill="none" preserveAspectRatio="xMidYMid slice">
+            <path d="M-100 200 C 300 -100, 600 500, 1500 200" stroke="#c4563a" strokeWidth="1" strokeOpacity="0.4" fill="none" />
+            <path d="M-100 700 C 400 900, 900 100, 1500 600" stroke="#c4563a" strokeWidth="1" strokeOpacity="0.2" fill="none" />
+            <path d="M300 -100 C 500 300, 100 700, 600 900" stroke="#1b3d22" strokeWidth="1" strokeOpacity="0.15" fill="none" />
+          </svg>
+        </div>
+
+        {/* Floating Elements (Food Images) */}
+        {/* Burger - Top Left */}
+        <motion.div 
+          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-24 left-10 md:left-32 w-32 h-32 md:w-48 md:h-48 z-0 pointer-events-none"
+        >
+          <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500&auto=format&fit=crop" alt="Burger" className="w-full h-full object-cover rounded-full mix-blend-multiply shadow-2xl border-4 border-white" />
+        </motion.div>
+
+        {/* Pizza - Bottom Right */}
+        <motion.div 
+          animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-40 right-10 md:right-32 w-40 h-40 md:w-56 md:h-56 z-0 pointer-events-none"
+        >
+          <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=500&auto=format&fit=crop" alt="Pizza" className="w-full h-full object-cover rounded-full mix-blend-multiply shadow-2xl border-4 border-white" />
+        </motion.div>
+
+        {/* Dim Sum / Momo - Top Right */}
+        <motion.div 
+          animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-32 right-20 md:right-48 w-24 h-24 md:w-36 md:h-36 z-0 pointer-events-none"
+        >
+          <img src="https://images.unsplash.com/photo-1496116218417-1a781b1c416c?q=80&w=500&auto=format&fit=crop" alt="Dumplings" className="w-full h-full object-cover rounded-full mix-blend-multiply shadow-2xl border-4 border-white" />
+        </motion.div>
+
+        {/* Tiny tomato / accent - Bottom Left */}
+        <motion.div 
+          animate={{ y: [0, 15, 0], rotate: [0, 45, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+          className="absolute bottom-52 left-20 md:left-40 w-16 h-16 md:w-20 md:h-20 z-0 pointer-events-none"
+        >
+          <img src="https://images.unsplash.com/photo-1524586322045-8869cecd9e69?q=80&w=200&auto=format&fit=crop" alt="Tomato" className="w-full h-full object-cover rounded-full mix-blend-multiply shadow-md border-2 border-white" />
+        </motion.div>
+
+        {/* Main Content */}
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex-grow flex flex-col justify-center">
           <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-6"
+            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8"
+            style={{ color: '#c4563a' }}
           >
-            Rescue delicious food, <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
-              save the planet.
-            </span>
+            Better food for <br/> less waste
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-2xl text-slate-600 mb-10 max-w-2xl mx-auto"
+            className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium"
           >
-            Discover surplus food from your favorite local restaurants and cafes at up to 70% off before it goes to waste.
+            For over a year, we've enabled our customers to discover surplus food from top restaurants, delivered right to their hands at up to 70% off.
           </motion.p>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
-            <Link to="/explore" className="group flex items-center justify-center space-x-2 bg-red-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-red-600 transition-all shadow-lg shadow-red-500/30 w-full sm:w-auto">
-              <span>Find Food Nearby</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <Link to="/explore" className="group flex items-center justify-center space-x-2 text-white px-10 py-4 rounded-full text-xl font-bold transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto" style={{ backgroundColor: '#c4563a' }}>
+              <span>Order Now</span>
+              <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/partner" className="group flex items-center justify-center space-x-2 bg-white text-slate-700 border-2 border-slate-200 px-8 py-4 rounded-full text-lg font-semibold hover:border-red-500 hover:text-red-500 transition-all w-full sm:w-auto">
-              <span>I'm a Business</span>
+            <Link to="/partner" className="group flex items-center justify-center space-x-2 bg-white px-10 py-4 rounded-full text-xl font-bold transition-all shadow-md hover:shadow-lg border-2 w-full sm:w-auto" style={{ color: '#1b3d22', borderColor: '#1b3d22' }}>
+              <span>Partner With Us</span>
             </Link>
           </motion.div>
         </div>
+
+        {/* Stats Bar */}
+        <div className="w-full mt-20 relative z-10">
+          <div className="max-w-6xl mx-auto px-4 pb-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-[#f3e9d2] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between"
+            >
+              <div className="flex-1 text-center border-b md:border-b-0 md:border-r border-slate-200 p-4">
+                <h3 className="text-4xl md:text-5xl font-black text-[#1b3d22] mb-2">10,000+</h3>
+                <p className="text-slate-500 font-medium text-lg uppercase tracking-wider">Meals Rescued</p>
+              </div>
+              <div className="flex-1 text-center border-b md:border-b-0 md:border-r border-slate-200 p-4">
+                <h3 className="text-4xl md:text-5xl font-black text-[#1b3d22] mb-2">500+</h3>
+                <p className="text-slate-500 font-medium text-lg uppercase tracking-wider">Partner Stores</p>
+              </div>
+              <div className="flex-1 text-center p-4">
+                <h3 className="text-4xl md:text-5xl font-black text-[#1b3d22] mb-2">50,000+</h3>
+                <p className="text-slate-500 font-medium text-lg uppercase tracking-wider">Happy Users</p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
+      {/* Features Section (Styled to match new theme) */}
+      <section className="py-24" style={{ backgroundColor: '#f3e9d2' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">How FlashFood Works</h2>
-            <p className="text-lg text-slate-600">Three simple steps to save money and reduce food waste.</p>
+            <h2 className="text-3xl md:text-5xl font-black text-[#1b3d22] mb-4">How FlashFood Works</h2>
+            <p className="text-xl text-slate-700">Three simple steps to save money and reduce waste.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
-              { icon: MapPin, title: "1. Discover", desc: "Find nearby stores with surplus food on our interactive map." },
-              { icon: Tag, title: "2. Reserve", desc: "Reserve your mystery bag or specific items at a massive discount." },
-              { icon: Clock, title: "3. Pick Up", desc: "Head to the store at the specified time to collect your food." }
+              { icon: MapPin, title: "1. Discover", desc: "Find nearby stores with surplus food on our map." },
+              { icon: Tag, title: "2. Reserve", desc: "Reserve your bag at a massive discount." },
+              { icon: Clock, title: "3. Pick Up", desc: "Head to the store to collect your food." }
             ].map((feature, idx) => (
               <motion.div 
                 key={idx}
@@ -73,13 +137,13 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.2 }}
-                className="flex flex-col items-center text-center p-6 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl transition-shadow"
+                className="flex flex-col items-center text-center p-10 rounded-3xl bg-white shadow-xl hover:-translate-y-2 transition-all duration-300"
               >
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center mb-6">
-                  <feature.icon className="w-8 h-8" />
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-8" style={{ backgroundColor: '#f3e9d2', color: '#c4563a' }}>
+                  <feature.icon className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600">{feature.desc}</p>
+                <h3 className="text-2xl font-black text-[#1b3d22] mb-4">{feature.title}</h3>
+                <p className="text-slate-600 text-lg leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
