@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand Green (Replacing dark slates for text/headers/accents) */
+  --color-slate-700: #2a5933;
+  --color-slate-800: #22482a;
+  --color-slate-900: #1b3d22;
+
+  /* Brand Cream (Replacing light slates for backgrounds/borders) */
+  --color-slate-50: #fbf9f4; /* Very light cream */
+  --color-slate-100: #f3e9d2; /* Standard cream */
+  --color-slate-200: #e8d7b3; /* Darker cream for borders */
+
+  /* Brand Rust Orange (Replacing default reds for buttons/alerts) */
+  --color-red-500: #c4563a;
+  --color-red-600: #a94a32;
+  --color-red-700: #8c3e2a;
+  --color-red-800: #713222;
+  
+  /* Brand Rust Orange (Replacing default oranges for active states/gradients) */
+  --color-orange-100: #fdeee9;
+  --color-orange-500: #c4563a;
+  --color-orange-600: #a94a32;
+}
 :root {
   --primary: #EF4444;
   --secondary: #2563EB;
