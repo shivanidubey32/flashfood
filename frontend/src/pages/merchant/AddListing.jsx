@@ -140,7 +140,7 @@ const AddListing = () => {
               <label className="block text-sm font-semibold text-slate-700 mb-2">Food Image</label>
               <div className="flex items-center space-x-4">
                 {formData.image ? (
-                  <img src={((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + formData.image} alt="Food preview" className="w-24 h-24 object-cover rounded-xl border border-slate-200 shadow-sm" />
+                  <img src={formData.image.startsWith('http') ? formData.image : (((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + formData.image)} alt="Food preview" className="w-24 h-24 object-cover rounded-xl border border-slate-200 shadow-sm" />
                 ) : (
                   <div className="w-24 h-24 bg-slate-100 rounded-xl flex items-center justify-center border border-dashed border-slate-300">
                     <ImageIcon className="w-8 h-8 text-slate-400" />
