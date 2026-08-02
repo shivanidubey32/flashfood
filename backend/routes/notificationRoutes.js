@@ -1,10 +1,11 @@
 import express from 'express';
-import { getMyNotifications, markNotificationAsRead, markAllAsRead, deleteNotification, clearAllNotifications } from '../controllers/notificationController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getMyNotifications, markNotificationAsRead, markAllAsRead, deleteNotification, clearAllNotifications, broadcastNotification } from '../controllers/notificationController.js';
+import { protect, authorize } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/').get(protect, getMyNotifications);
+router.route('/broadcast').post(protect, authorize('Merchant'), broadcastNotification);
 router.route('/read-all').put(protect, markAllAsRead);
 router.route('/clear-all').delete(protect, clearAllNotifications);
 router.route('/:id/read').put(protect, markNotificationAsRead);

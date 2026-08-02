@@ -1,5 +1,6 @@
 import asyncHandler from '../middlewares/asyncHandler.js';
 import Notification from '../models/Notification.js';
+import User from '../models/User.js';
 
 // @desc    Get logged in user notifications
 // @route   GET /api/notifications
@@ -66,4 +67,36 @@ export const deleteNotification = asyncHandler(async (req, res) => {
 export const clearAllNotifications = asyncHandler(async (req, res) => {
   await Notification.deleteMany({ recipient: req.user._id });
   res.json({ message: 'All notifications cleared' });
+});
+
+// @desc    Broadcast a notification to Customers and NGOs
+// @route   POST /api/notifications/broadcast
+// @access  Private (Merchant only)
+export const broadcastNotification = asyncHandler(async (req, res) => {
+  const { title, message } = req.body;
+
+  if (!title || !message) {
+    res.status(400);
+    throw new Error('Please provide title and message for the broadcast');
+  }
+
+  // Find all Customers and NGOs
+  const usersToNotify = await User.find({ role: { $in: ['Customer', 'NGO'] } });
+
+  if (usersToNotify.length === 0) {
+    return res.json({ message: 'No customers or NGOs found to notify', count: 0 });
+  }
+
+  // Create notifications in bulk
+  const notifications = usersToNotify.map(user => ({
+    recipient: user._id,
+    type: 'Merchant_Broadcast',
+    title: `[Merchant Broadcast] ${title}`,
+    message: message,
+    isRead: false
+  }));
+
+  await Notification.insertMany(notifications);
+
+  res.status(201).json({ message: 'Broadcast sent successfully!', count: notifications.length });
 });
