@@ -32,8 +32,8 @@ const Navbar = () => {
 
   const getLinkClass = (path) => {
     return location.pathname === path 
-      ? "text-[#c4563a] font-bold transition-colors border-b-2 border-[#c4563a] pb-1" 
-      : "text-slate-600 hover:text-[#c4563a] font-medium transition-colors pb-1 border-b-2 border-transparent";
+      ? "text-[#d2642b] font-bold transition-colors border-b-2 border-[#d2642b] pb-1" 
+      : "text-slate-600 hover:text-[#d2642b] font-medium transition-colors pb-1 border-b-2 border-transparent";
   };
 
   return (
@@ -56,20 +56,20 @@ const Navbar = () => {
             
             {userInfo ? (
               <div className="flex items-center space-x-3">
-                <Link to={getDashboardLink()} className="flex items-center space-x-2 text-slate-700 hover:text-[#c4563a] font-bold transition-colors">
+                <Link to={getDashboardLink()} className="flex items-center space-x-2 text-slate-700 hover:text-[#d2642b] font-bold transition-colors">
                   <LayoutDashboard className="w-5 h-5" />
                   <span>Dashboard</span>
                 </Link>
                 <button 
                   onClick={handleLogout}
-                  className="p-2 text-slate-400 hover:text-[#c4563a] transition-colors"
+                  className="p-2 text-slate-400 hover:text-[#d2642b] transition-colors"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="flex items-center space-x-2 bg-[#c4563a] text-white px-4 py-2 rounded-full hover:bg-[#a94a32] transition-colors shadow-lg shadow-[#c4563a]/30">
+              <Link to="/login" className="flex items-center space-x-2 bg-[#d2642b] text-white px-4 py-2 rounded-full hover:bg-[#b85422] transition-colors shadow-lg shadow-[#d2642b]/30">
                 <User className="w-4 h-4" />
                 <span>Login</span>
               </Link>
@@ -77,7 +77,7 @@ const Navbar = () => {
           </div>
 
           <div className="md:hidden flex items-center">
-            <button className="text-slate-600 hover:text-[#c4563a] p-2">
+            <button className="text-slate-600 hover:text-[#d2642b] p-2">
               <Menu className="w-6 h-6" />
             </button>
           </div>

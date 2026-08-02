@@ -2,25 +2,25 @@
 
 @theme {
   /* Brand Green (Replacing dark slates for text/headers/accents) */
-  --color-slate-700: #2a5933;
-  --color-slate-800: #22482a;
-  --color-slate-900: #1b3d22;
+  --color-slate-700: #2c4d2c;
+  --color-slate-800: #254425;
+  --color-slate-900: #1f3a1f;
 
   /* Brand Cream (Replacing light slates for backgrounds/borders) */
-  --color-slate-50: #fbf9f4; /* Very light cream */
-  --color-slate-100: #f3e9d2; /* Standard cream */
-  --color-slate-200: #e8d7b3; /* Darker cream for borders */
+  --color-slate-50: #fdf5d3; /* Very light cream */
+  --color-slate-100: #fae8b6; /* Standard cream */
+  --color-slate-200: #ebd498; /* Darker cream for borders */
 
   /* Brand Rust Orange (Replacing default reds for buttons/alerts) */
-  --color-red-500: #c4563a;
-  --color-red-600: #a94a32;
-  --color-red-700: #8c3e2a;
-  --color-red-800: #713222;
+  --color-red-500: #d2642b;
+  --color-red-600: #b85422;
+  --color-red-700: #9e461a;
+  --color-red-800: #853812;
   
   /* Brand Rust Orange (Replacing default oranges for active states/gradients) */
   --color-orange-100: #fdeee9;
-  --color-orange-500: #c4563a;
-  --color-orange-600: #a94a32;
+  --color-orange-500: #d2642b;
+  --color-orange-600: #b85422;
 }
 :root {
   --primary: #EF4444;
