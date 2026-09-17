@@ -83,6 +83,14 @@ If you would like to run this project on your own machine:
    cd frontend
    npm run dev
    ```
+ 5 **User Roles & Authentication**
 
+FlashFood supports multiple types of users through role-based authentication. A user can register using their email ID and password and select the appropriate role:
+
+Customer: Customers can create an account, log in with their email ID, browse nearby surplus-food deals, purchase or reserve food, and provide reviews after their purchase.
+Merchant: Restaurants, cafes, bakeries, and other food businesses can register as merchants. After logging in, merchants can add surplus food listings, upload food images, set discounted prices, and manage their available inventory and orders.
+NGO: NGOs can register and log in using their email ID. They can access the platform to help utilize suitable surplus food for donation and community support.
+
+The application uses JWT-based authentication and role-based authorization, ensuring that users can access only the features and dashboards relevant to their selected role.
 ---
 *Created as a Final Year Academic Project to demonstrate Full-Stack Engineering capabilities.*
