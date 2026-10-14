@@ -127,9 +127,21 @@ const Home = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
-              { icon: MapPin, title: "1. Discover", desc: "Find nearby stores with surplus food on our map." },
-              { icon: Tag, title: "2. Reserve", desc: "Reserve your bag at a massive discount." },
-              { icon: Clock, title: "3. Pick Up", desc: "Head to the store to collect your food." }
+              { 
+                imgSrc: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTPh7PbRhYQlqaXsfm1wBq9o-eDq65oUEj7gDEWTIKZw&s=10", 
+                title: "1. Discover", 
+                desc: "Find nearby stores with surplus food on our map." 
+              },
+              { 
+                imgSrc: "https://static.thenounproject.com/png/3201806-200.png", 
+                title: "2. Reserve", 
+                desc: "Reserve your bag at a massive discount." 
+              },
+              { 
+                imgSrc: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd5h3EBqw5sO0IPPTAUcU2gk4ytZ_f420_ITNkkiHJvw&s=10", 
+                title: "3. Pick Up", 
+                desc: "Head to the store to collect your food." 
+              }
             ].map((feature, idx) => (
               <motion.div 
                 key={idx}
@@ -139,8 +151,12 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: idx * 0.2 }}
                 className="flex flex-col items-center text-center p-10 rounded-3xl bg-white shadow-xl hover:-translate-y-2 transition-all duration-300"
               >
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-8" style={{ backgroundColor: '#f3e9d2', color: '#c4563a' }}>
-                  <feature.icon className="w-10 h-10" />
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-8 overflow-hidden" style={{ backgroundColor: '#f3e9d2', color: '#c4563a' }}>
+                  {feature.imgSrc ? (
+                    <img src={feature.imgSrc} alt={feature.title} className="w-12 h-12 object-contain mix-blend-multiply" />
+                  ) : (
+                    <feature.icon className="w-10 h-10" />
+                  )}
                 </div>
                 <h3 className="text-2xl font-black text-[#1b3d22] mb-4">{feature.title}</h3>
                 <p className="text-slate-600 text-lg leading-relaxed">{feature.desc}</p>

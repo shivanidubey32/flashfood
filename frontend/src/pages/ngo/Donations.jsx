@@ -20,8 +20,12 @@ const Donations = () => {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
+  const [now, setNow] = useState(new Date());
+
   useEffect(() => {
     fetchDonations();
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -219,15 +223,17 @@ const Donations = () => {
         {/* Map Pins */}
         {filteredDonations.map(donation => {
           const isSelected = selectedDonation?._id === donation._id;
+          const isExpired = new Date(donation.pickupTimeLimit) < now;
           
           return (
             <div 
               key={donation._id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 transition-all ${isExpired ? 'opacity-50 grayscale pointer-events-none' : ''}`}
               style={{ top: donation.top, left: donation.left }}
             >
               <button 
                 onClick={() => setSelectedDonation(donation)}
+                disabled={isExpired}
                 className={`relative group ${isSelected ? 'z-20' : 'z-10'}`}
               >
                 {/* Pin Animation */}

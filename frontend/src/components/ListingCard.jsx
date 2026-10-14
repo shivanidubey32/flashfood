@@ -33,8 +33,8 @@ const ListingCard = ({ listing, isWishlisted, onToggleWishlist }) => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ y: -5 }}
-        className="glass rounded-2xl overflow-hidden flex flex-col h-full group cursor-pointer"
+        whileHover={timeLeft === 'Expired' ? {} : { y: -5 }}
+        className={`glass rounded-2xl overflow-hidden flex flex-col h-full group cursor-pointer transition-all duration-300 ${timeLeft === 'Expired' ? 'opacity-50 grayscale pointer-events-none' : ''}`}
       >
         <div className="relative h-48 overflow-hidden shrink-0">
           <img 
@@ -79,10 +79,7 @@ const ListingCard = ({ listing, isWishlisted, onToggleWishlist }) => {
             {listing.description}
           </p>
           
-          <div className="flex items-center justify-between mt-auto">
-            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
-              {listing.quantity} left
-            </span>
+          <div className="flex items-center justify-end mt-auto">
             <button className="flex items-center text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-full transition-colors z-10">
               <ShoppingBag className="w-4 h-4 mr-2" />
               View Deal

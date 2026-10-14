@@ -3,7 +3,7 @@ import { Bell, AlertCircle, CheckCircle, Package, Clock, X, Send, MessageSquare 
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const Notifications = () => {
+const Notifications = ({ isSidebar = false }) => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,28 +97,28 @@ const Notifications = () => {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className={isSidebar ? "p-6" : "p-8 max-w-5xl mx-auto"}>
+      <div className={`flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 ${isSidebar ? 'md:flex-col items-start' : ''}`}>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Notifications</h1>
-          <p className="text-slate-600 mt-1">Stay updated on orders, inventory, and donations.</p>
+          <h1 className={`${isSidebar ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Notifications</h1>
+          <p className="text-slate-600 mt-1 text-sm">Stay updated on orders, inventory, and donations.</p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className={`flex flex-wrap gap-2 ${isSidebar ? 'w-full' : ''}`}>
           <button 
             onClick={() => setIsModalOpen(true)} 
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-md"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-md whitespace-nowrap"
           >
             <Send className="w-4 h-4" />
             New Broadcast
           </button>
-          <button onClick={markAllRead} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">Mark all read</button>
-          <button onClick={clearAll} className="px-4 py-2 bg-[#d2642b] text-white rounded-xl text-sm font-bold hover:bg-[#b85422] transition-colors shadow-md shadow-[#d2642b]/20">Clear all</button>
+          <button onClick={markAllRead} className="flex-1 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors whitespace-nowrap">Mark all read</button>
+          {notifications.length > 0 && <button onClick={clearAll} className="px-3 py-2 bg-[#d2642b] text-white rounded-xl text-xs font-bold hover:bg-[#b85422] transition-colors shadow-md shadow-[#d2642b]/20 whitespace-nowrap">Clear all</button>}
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 font-bold">Loading...</div>
+      <div className={`bg-white rounded-2xl ${isSidebar ? '' : 'shadow-sm border border-slate-100'} overflow-hidden`}>
+        {loading && notifications.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 font-bold animate-pulse">Loading notifications...</div>
         ) : notifications.length === 0 ? (
           <div className="p-12 text-center">
             <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />

@@ -11,16 +11,51 @@ import {
   X,
   Crosshair,
   CheckCircle,
-  ShieldCheck
+  ShieldCheck,
+  Bell
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import Logo from '../Logo';
 
 const CustomerLayout = () => {
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  
+  // Notifications State
+  const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  
+  useEffect(() => {
+    if (userInfo.token) {
+      fetchNotifications();
+    }
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/notifications`, config);
+      setNotifications(data);
+    } catch (error) {
+      console.error("Error fetching notifications", error);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/notifications/${id}/read`, {}, config);
+      setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch (error) {
+      console.error("Error marking notification as read", error);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
   
   // Location State
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -33,10 +68,48 @@ const CustomerLayout = () => {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
+  const [isLocating, setIsLocating] = useState(false);
+
   const handleLocationSelect = (city) => {
     setCurrentLocation(city);
     setShowLocationModal(false);
     showToast(`Location updated to ${city}`);
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      showToast('Geolocation is not supported by your browser.', 'error');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          // Reverse geocoding using Nominatim (free, no API key required)
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+          
+          // Extract city/town/village
+          const city = data.address.city || data.address.town || data.address.village || data.address.state || 'Unknown Location';
+          
+          setCurrentLocation(city);
+          setShowLocationModal(false);
+          showToast(`Location updated to ${city}`);
+        } catch (error) {
+          console.error("Geocoding failed:", error);
+          showToast('Failed to determine city name.', 'error');
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        showToast('Please enable location permissions.', 'error');
+        setIsLocating(false);
+      }
+    );
   };
 
   const handleLogout = () => {
@@ -119,11 +192,12 @@ const CustomerLayout = () => {
                 </div>
 
                 <button 
-                  onClick={() => handleLocationSelect('Current Location')}
-                  className="w-full flex items-center p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors mb-4 font-bold"
+                  onClick={handleUseCurrentLocation}
+                  disabled={isLocating}
+                  className="w-full flex items-center p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors mb-4 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Crosshair className="w-5 h-5 mr-3" />
-                  Use Current Location
+                  <Crosshair className={`w-5 h-5 mr-3 ${isLocating ? 'animate-spin' : ''}`} />
+                  {isLocating ? 'Locating...' : 'Use Current Location'}
                 </button>
 
                 <div>
@@ -155,8 +229,11 @@ const CustomerLayout = () => {
             
             {/* Logo */}
             <div className="flex items-center">
-              <NavLink to="/customer/explore" className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent tracking-tight">
-                FlashFood
+              <NavLink to="/customer/explore" className="flex items-center space-x-2">
+                <Logo className="w-10 h-10" />
+                <span className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent tracking-tight">
+                  FlashFood
+                </span>
               </NavLink>
               
               {/* Location Picker (Dynamic) */}
@@ -183,6 +260,48 @@ const CustomerLayout = () => {
               
               <div className="h-6 w-px bg-slate-200 mx-2"></div>
               
+              {/* Notifications Dropdown */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotificationsMenu(!showNotificationsMenu)}
+                  className="relative p-2 text-slate-700 hover:text-red-500 transition-colors"
+                >
+                  <Bell className="w-6 h-6" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotificationsMenu && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 max-h-96 overflow-y-auto">
+                    <div className="px-4 py-3 border-b border-slate-100 sticky top-0 bg-white z-10 flex justify-between items-center">
+                      <h3 className="font-bold text-slate-900">Notifications</h3>
+                      {unreadCount > 0 && <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-bold">{unreadCount} new</span>}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-slate-500 text-sm">No notifications yet.</div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif._id} 
+                          onClick={() => !notif.isRead && handleMarkAsRead(notif._id)}
+                          className={`px-4 py-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition-colors ${!notif.isRead ? 'bg-red-50/30' : 'opacity-70'}`}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-bold text-sm text-slate-900">{notif.title}</span>
+                            {!notif.isRead && <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></span>}
+                          </div>
+                          <p className="text-xs text-slate-600 line-clamp-2">{notif.message}</p>
+                          <span className="text-[10px] text-slate-400 mt-2 block">{new Date(notif.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
               <NavLink to="/customer/cart" className="relative p-2 text-slate-700 hover:text-red-500 transition-colors">
                 <ShoppingBag className="w-6 h-6" />
                 {cartCount > 0 && (
@@ -200,7 +319,7 @@ const CustomerLayout = () => {
                 >
                   {userInfo.profilePicture ? (
                     <img 
-                      src={((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + userInfo.profilePicture} 
+                      src={userInfo.profilePicture.startsWith('http') ? userInfo.profilePicture : (((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + userInfo.profilePicture)} 
                       alt={userInfo.name} 
                       className="w-full h-full object-cover"
                     />
@@ -232,7 +351,42 @@ const CustomerLayout = () => {
             </div>
 
             {/* Mobile Header Icons */}
-            <div className="md:hidden flex items-center space-x-4">
+            <div className="md:hidden flex items-center space-x-4 relative">
+              <button onClick={() => setShowNotificationsMenu(!showNotificationsMenu)} className="relative p-2 text-slate-700">
+                <Bell className="w-6 h-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute 0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {showNotificationsMenu && (
+                <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 max-h-96 overflow-y-auto">
+                  <div className="px-4 py-3 border-b border-slate-100 sticky top-0 bg-white z-10 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-900">Notifications</h3>
+                    {unreadCount > 0 && <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-bold">{unreadCount} new</span>}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-slate-500 text-sm">No notifications yet.</div>
+                  ) : (
+                    notifications.map(notif => (
+                      <div 
+                        key={notif._id} 
+                        onClick={() => !notif.isRead && handleMarkAsRead(notif._id)}
+                        className={`px-4 py-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition-colors ${!notif.isRead ? 'bg-red-50/30' : 'opacity-70'}`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-bold text-sm text-slate-900">{notif.title}</span>
+                          {!notif.isRead && <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></span>}
+                        </div>
+                        <p className="text-xs text-slate-600 line-clamp-2">{notif.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
               <NavLink to="/customer/cart" className="relative p-2 text-slate-700">
                 <ShoppingBag className="w-6 h-6" />
                 {cartCount > 0 && (

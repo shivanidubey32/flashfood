@@ -18,8 +18,12 @@ const Donations = () => {
   // Confirm Modal State
   const [confirmModal, setConfirmModal] = useState({ show: false, listing: null });
 
+  const [now, setNow] = useState(new Date());
+
   useEffect(() => {
     fetchUnsoldListings();
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const fetchUnsoldListings = async () => {
@@ -145,46 +149,70 @@ const Donations = () => {
       </AnimatePresence>
 
       <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Donation Management</h1>
-          <p className="text-slate-600 mt-1">Convert unsold food into donations for local NGOs.</p>
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-200">
+            <img src="https://as2.ftcdn.net/jpg/02/36/94/15/1000_F_236941518_0TMR9I17SdTXPN2cJc7cxsWQN9WQ3Bhu.jpg" alt="Icon" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Donation Management</h1>
+            <p className="text-slate-600 mt-1">Convert unsold food into donations for local NGOs.</p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          <div className="col-span-full text-center py-8 text-slate-500">Loading unsold inventory...</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+        {loading && unsoldListings.length === 0 ? (
+          <div className="col-span-full py-12 flex justify-center items-center">
+            <div className="animate-pulse flex space-x-4">
+              <div className="rounded-xl bg-slate-200 h-12 w-12"></div>
+              <div className="flex-1 space-y-4 py-1">
+                <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-slate-200 rounded"></div>
+                  <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : unsoldListings.length === 0 ? (
           <div className="col-span-full text-center py-8 text-slate-500">No unsold food available to donate.</div>
         ) : (
-          unsoldListings.map((item, idx) => (
+          unsoldListings.map((item, idx) => {
+            const isExpired = new Date(item.expiryTime) < now;
+            return (
             <motion.div 
               key={item._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col"
+              className={`bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col transition-all ${isExpired ? 'opacity-60 grayscale' : ''}`}
             >
               <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isExpired ? 'bg-slate-200 text-slate-500' : 'bg-orange-100 text-orange-500'}`}>
                   <Package className="w-6 h-6" />
                 </div>
-                <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold">
-                  Qty: {item.quantityAvailable}
-                </span>
+                <div className="flex flex-col items-end">
+                  <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold">
+                    Qty: {item.quantityAvailable}
+                  </span>
+                  {isExpired && <span className="text-xs font-bold text-red-500 mt-1">Expired</span>}
+                </div>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
               <p className="text-slate-500 text-sm mb-6 flex-grow">{item.description}</p>
               
               <button 
                 onClick={() => handleDonateClick(item)}
-                className="w-full flex items-center justify-center space-x-2 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white py-3 rounded-xl transition-colors font-semibold"
+                disabled={isExpired}
+                className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl transition-colors font-semibold ${
+                  isExpired ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white'
+                }`}
               >
                 <HeartHandshake className="w-5 h-5" />
-                <span>Donate Food</span>
+                <span>{isExpired ? 'Cannot Donate' : 'Donate Food'}</span>
               </button>
             </motion.div>
-          ))
+          )})
         )}
       </div>
 
@@ -218,7 +246,7 @@ const Donations = () => {
                           {don.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-700">{don.claimedBy?.name || '-'}</td>
+                      <td className="px-6 py-4 text-slate-700">{don.claimedBy?.businessName || don.claimedBy?.name || '-'}</td>
                     </tr>
                   ))
                 )}

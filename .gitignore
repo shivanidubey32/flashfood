@@ -7,3 +7,5 @@ dist/
 build/
 frontend/dist/
 backend/uploads/
+backend/test_upload.js
+frontend/copyImage.js

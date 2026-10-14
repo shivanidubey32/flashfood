@@ -47,6 +47,13 @@ const orderSchema = new mongoose.Schema(
       enum: ['Pickup', 'Delivery'],
       default: 'Pickup',
     },
+    deliveryAddress: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      default: 'Card',
+    },
   },
   {
     timestamps: true,

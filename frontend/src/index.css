@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -21,6 +22,21 @@
   --color-orange-100: #fdeee9;
   --color-orange-500: #d2642b;
   --color-orange-600: #b85422;
+
+  /* Global Typography */
+  --font-sans: 'Poppins', sans-serif;
+  
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 18px;
+  --text-2xl: 24px;
+  --text-3xl: 24px;
+  --text-4xl: 36px;
+  --text-5xl: 36px;
+  --text-6xl: 36px;
+  --text-7xl: 36px;
 }
 :root {
   --primary: #EF4444;
@@ -29,7 +45,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #f8fafc;
   color: #0f172a;
 }

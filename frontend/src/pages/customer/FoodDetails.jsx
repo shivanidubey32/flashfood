@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const FoodDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const [listing, setListing] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,11 @@ const FoodDetails = () => {
 
   const discount = Math.round(((listing.originalPrice - listing.discountedPrice) / listing.originalPrice) * 100);
   const expiry = new Date(listing.expiryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  const cartItem = cartItems.find(item => item._id === listing._id);
+  const quantityInCart = cartItem ? cartItem.cartQuantity : 0;
+  const totalAvailable = listing.quantityAvailable || listing.quantity || 0;
+  const itemsLeft = Math.max(0, totalAvailable - quantityInCart);
 
   const handleAddToCart = () => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -166,7 +171,7 @@ const FoodDetails = () => {
                 </div>
               </div>
               <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
-                {listing.quantityAvailable || listing.quantity} left
+                {itemsLeft} left
               </span>
             </div>
 
@@ -178,22 +183,25 @@ const FoodDetails = () => {
                 >-</button>
                 <span className="w-8 text-center font-bold text-slate-900">{quantity}</span>
                 <button 
-                  onClick={() => setQuantity(Math.min(listing.quantityAvailable || listing.quantity, quantity + 1))}
-                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition-colors font-bold"
+                  onClick={() => setQuantity(Math.min(itemsLeft, quantity + 1))}
+                  disabled={itemsLeft === 0}
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-white rounded-lg transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >+</button>
               </div>
               
               <button 
                 onClick={handleAddToCart}
-                disabled={added}
+                disabled={added || itemsLeft === 0}
                 className={`flex-1 flex items-center justify-center font-bold py-3.5 rounded-xl transition-all shadow-lg active:scale-[0.98] ${
                   added 
                     ? 'bg-green-500 text-white shadow-green-500/20' 
-                    : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20'
+                    : itemsLeft === 0 
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20'
                 }`}
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                {added ? 'Added to Cart! ✅' : 'Add to Cart'}
+                {added ? 'Added to Cart! ✅' : itemsLeft === 0 ? 'Sold Out' : 'Add to Cart'}
               </button>
             </div>
           </div>

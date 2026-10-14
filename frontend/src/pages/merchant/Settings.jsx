@@ -73,10 +73,14 @@ const Settings = () => {
     handleSaveSettings(newSettings);
   };
 
-  if (loading) return <div className="p-8 flex justify-center"><Loader className="w-8 h-8 animate-spin text-orange-500" /></div>;
-
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto relative">
+      {/* Optional: subtle non-blocking loader indicator if still loading */}
+      {loading && (
+        <div className="absolute top-8 right-8 text-orange-500 text-sm font-bold flex items-center">
+          <Loader className="w-4 h-4 animate-spin mr-2" /> Syncing...
+        </div>
+      )}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Store Settings</h1>

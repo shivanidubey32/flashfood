@@ -58,8 +58,22 @@ const MyOrders = () => {
       case 'Ready': return <Package className="w-5 h-5 text-green-500 animate-pulse" />;
       case 'Completed': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
       case 'Cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
+      case 'Cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
       default: return <Clock className="w-5 h-5 text-slate-500" />;
     }
+  };
+
+  const getFormattedAddress = (merchant) => {
+    if (!merchant || !merchant.address) return 'Address will be provided on receipt.';
+    if (typeof merchant.address === 'string') return merchant.address;
+    
+    const parts = [];
+    if (merchant.address.street) parts.push(merchant.address.street);
+    if (merchant.address.city) parts.push(merchant.address.city);
+    if (merchant.address.state) parts.push(merchant.address.state);
+    if (merchant.address.zipCode) parts.push(merchant.address.zipCode);
+    
+    return parts.length > 0 ? parts.join(', ') : 'Address will be provided on receipt.';
   };
 
   const getStatusColor = (status) => {
@@ -142,13 +156,15 @@ const MyOrders = () => {
 
               <div className="md:w-64 shrink-0 bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pickup Information</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    {order.pickupMethod === 'Delivery' ? 'Delivery Information' : 'Pickup Information'}
+                  </p>
                   <p className="text-sm font-semibold text-slate-900 flex items-start mb-2">
                     <MapPin className="w-4 h-4 text-slate-400 mr-1.5 mt-0.5 shrink-0" />
                     <span className="line-clamp-2">
-                      {order.merchant?.address?.street 
-                        ? `${order.merchant.address.street}, ${order.merchant.address.city}`
-                        : `${order.merchant?.businessName || order.merchant?.name || 'Merchant'} Location`}
+                      {order.pickupMethod === 'Delivery' && order.deliveryAddress
+                        ? order.deliveryAddress
+                        : getFormattedAddress(order.merchant)}
                     </span>
                   </p>
                 </div>

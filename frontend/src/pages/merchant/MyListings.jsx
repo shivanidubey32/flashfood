@@ -20,8 +20,14 @@ const MyListings = () => {
   // Confirm Modal State
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
 
+  const [now, setNow] = useState(new Date());
+
   useEffect(() => {
     fetchListings();
+    
+    // Update the 'now' state every second to drive the countdown timers
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const fetchListings = async () => {
@@ -129,8 +135,25 @@ const MyListings = () => {
                   <td colSpan="7" className="text-center py-8 text-slate-500">No active listings found. Add some from the Add Listing tab!</td>
                 </tr>
               ) : (
-                listings.map((item) => (
-                  <tr key={item._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                listings.map((item) => {
+                  const difference = new Date(item.expiryTime) - now;
+                  let timeLeftText = '';
+                  let isExpired = false;
+
+                  if (difference > 0) {
+                    const h = Math.floor((difference / (1000 * 60 * 60)) % 24);
+                    const m = Math.floor((difference / 1000 / 60) % 60);
+                    const s = Math.floor((difference / 1000) % 60);
+                    timeLeftText = `${h > 0 ? h + 'h ' : ''}${m}m ${s}s left`;
+                  } else {
+                    isExpired = true;
+                    timeLeftText = 'Expired';
+                  }
+                  
+                  const displayStatus = isExpired ? 'Expired' : item.status;
+
+                  return (
+                  <tr key={item._id} className={`border-b border-slate-50 hover:bg-slate-50/50 transition-colors ${isExpired ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4 font-medium text-slate-900">
                       <div className="flex flex-col">
                         <span>{item.title}</span>
@@ -141,22 +164,33 @@ const MyListings = () => {
                     <td className="px-6 py-4 font-bold text-green-600">₹{item.discountedPrice}</td>
                     <td className="px-6 py-4 text-slate-600">{item.quantityAvailable}</td>
                     <td className="px-6 py-4 text-slate-600 flex items-center mt-2">
-                      <Clock className="w-4 h-4 mr-1 text-slate-400" /> 
-                      {new Date(item.expiryTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      <Clock className={`w-4 h-4 mr-1 ${isExpired ? 'text-red-500' : 'text-slate-400'}`} /> 
+                      <span className={isExpired ? 'text-red-500 font-bold' : ''}>{timeLeftText}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        isExpired ? 'bg-slate-100 text-slate-500' :
                         item.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {item.status}
+                        {displayStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <button onClick={() => editListing(item)} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Listing">
+                        <button 
+                          onClick={() => editListing(item)} 
+                          disabled={isExpired}
+                          className={`p-2 rounded-lg transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-400 hover:text-blue-500 hover:bg-blue-50'}`} 
+                          title="Edit Listing"
+                        >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => markSoldOut(item._id)} className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors" title="Mark Sold Out">
+                        <button 
+                          onClick={() => markSoldOut(item._id)} 
+                          disabled={isExpired}
+                          className={`p-2 rounded-lg transition-colors ${isExpired ? 'text-slate-300 cursor-not-allowed' : 'text-slate-400 hover:text-orange-500 hover:bg-orange-50'}`} 
+                          title="Mark Sold Out"
+                        >
                           <CheckCircle className="w-4 h-4" />
                         </button>
                         <button onClick={() => deleteListing(item._id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Listing">
@@ -165,7 +199,7 @@ const MyListings = () => {
                       </div>
                     </td>
                   </tr>
-                ))
+                )})
               )}
             </tbody>
           </table>

@@ -70,9 +70,14 @@ const Reviews = () => {
         )}
       </AnimatePresence>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Customer Reviews</h1>
-        <p className="text-slate-600 mt-1">Read and respond to feedback from your customers.</p>
+      <div className="mb-8 flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-200">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_GaYktYcG1e7l5MGYFjNwOZeJat7MK7zQD2Eyd0u5Og&s=10" alt="Icon" className="w-full h-full object-cover" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Customer Reviews</h1>
+          <p className="text-slate-600 mt-1">Read and respond to feedback from your customers.</p>
+        </div>
       </div>
 
       <div className="space-y-6">

@@ -50,11 +50,12 @@ const About = () => {
     <div className="w-full bg-slate-50 overflow-hidden">
       
       {/* 1. Hero Section */}
-      <section className="relative w-full min-h-[70vh] flex items-center justify-center pt-24 pb-16 px-4">
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
+      <section 
+        className="relative w-full min-h-[70vh] flex items-center justify-center pt-24 pb-16 px-4 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2500&auto=format&fit=crop')" }}
+      >
+        {/* Dark Gradient Overlay so the image is CLEAR but text is readable */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-900/40"></div>
         
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <motion.div
@@ -62,23 +63,23 @@ const About = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block py-1 px-3 rounded-full bg-red-100 text-red-600 font-semibold text-sm mb-6">
+            <span className="inline-block py-1 px-3 rounded-full bg-red-500/20 text-red-100 border border-red-500/30 font-semibold text-sm mb-6 backdrop-blur-md">
               Our Mission
             </span>
-            <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-tight">
               Reimagining the future of <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-green-400">
                 food sustainability.
               </span>
             </h1>
-            <p className="text-lg md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-2xl text-slate-200 mb-10 max-w-3xl mx-auto leading-relaxed">
               We connect food outlets with surplus food to conscious consumers and local NGOs, ensuring good food ends up in bellies, not landfills.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link to="/explore" className="bg-red-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-red-600 transition-all shadow-lg hover:shadow-red-500/40 hover:-translate-y-1 w-full sm:w-auto">
                 Join the Movement
               </Link>
-              <Link to="/partner" className="bg-white text-slate-700 border-2 border-slate-200 px-8 py-4 rounded-full font-bold text-lg hover:border-red-500 hover:text-red-500 transition-all w-full sm:w-auto">
+              <Link to="/partner" className="bg-white/10 text-white border-2 border-white/30 px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-slate-900 transition-all w-full sm:w-auto backdrop-blur-sm">
                 Become a Partner
               </Link>
             </div>

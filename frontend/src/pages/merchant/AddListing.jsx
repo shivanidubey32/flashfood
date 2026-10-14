@@ -17,7 +17,7 @@ const AddListing = () => {
     discountedPrice: '',
     quantityAvailable: '',
     dietaryType: 'Veg',
-    expiryTime: '',
+    freshnessDuration: '6',
     image: '',
   });
   const [uploading, setUploading] = useState(false);
@@ -30,7 +30,13 @@ const AddListing = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post('/listings', formData);
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + parseInt(formData.freshnessDuration));
+      
+      const payload = { ...formData, expiryTime: expiryDate.toISOString() };
+      delete payload.freshnessDuration;
+
+      await API.post('/listings', payload);
       navigate('/dashboard/merchant/listings');
     } catch (error) {
       console.error("Failed to add listing", error);
@@ -69,8 +75,8 @@ const AddListing = () => {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-8 flex items-center space-x-3">
-        <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
-          <PackageOpen className="w-6 h-6" />
+        <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-200">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpNtQCWkD93Ly56fiOtDtf6jmIqhLj86WOYZ8eX8TEGg&s=10" alt="Icon" className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Add New Listing</h1>
@@ -118,22 +124,31 @@ const AddListing = () => {
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Original Price (₹)</label>
-              <input type="number" name="originalPrice" required value={formData.originalPrice} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="150" />
+              <input type="number" name="originalPrice" required min="0" value={formData.originalPrice} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="150" />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Discounted Price (₹)</label>
-              <input type="number" name="discountedPrice" required value={formData.discountedPrice} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="50" />
+              <input type="number" name="discountedPrice" required min="0" value={formData.discountedPrice} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="50" />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Quantity Available</label>
-              <input type="number" name="quantityAvailable" required value={formData.quantityAvailable} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="e.g. 5" />
+              <input type="number" name="quantityAvailable" required min="1" value={formData.quantityAvailable} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="e.g. 5" />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Expiry Time</label>
-              <input type="datetime-local" name="expiryTime" required value={formData.expiryTime} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Freshness Duration</label>
+              <select name="freshnessDuration" required value={formData.freshnessDuration} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none">
+                <option value="1">1 Hour</option>
+                <option value="2">2 Hours</option>
+                <option value="3">3 Hours</option>
+                <option value="4">4 Hours</option>
+                <option value="5">5 Hours</option>
+                <option value="6">6 Hours</option>
+                <option value="12">12 Hours</option>
+                <option value="24">24 Hours</option>
+              </select>
             </div>
 
             <div className="md:col-span-2">

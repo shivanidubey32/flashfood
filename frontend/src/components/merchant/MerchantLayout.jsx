@@ -19,10 +19,12 @@ import {
   ChevronDown
 } from 'lucide-react';
 import Logo from '../Logo';
+import NotificationsPanel from '../../pages/merchant/Notifications';
 
 const MerchantLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showNotificationsSide, setShowNotificationsSide] = useState(false);
   const navigate = useNavigate();
   const profileRef = useRef(null);
   
@@ -57,7 +59,7 @@ const MerchantLayout = () => {
     <NavLink
       to={item.path}
       className={({ isActive }) =>
-        `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+        `flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap ${
           isActive 
             ? 'bg-orange-50 text-orange-600 font-bold shadow-sm' 
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
@@ -65,8 +67,8 @@ const MerchantLayout = () => {
       }
       onClick={() => setIsMobileMenuOpen(false)}
     >
-      <item.icon className="w-5 h-5" />
-      <span>{item.name}</span>
+      <item.icon className="w-5 h-5 md:w-4 md:h-4" />
+      <span className="md:text-sm">{item.name}</span>
     </NavLink>
   );
 
@@ -106,10 +108,13 @@ const MerchantLayout = () => {
           </div>
 
           {/* Notifications */}
-          <Link to="/dashboard/merchant/notifications" className="relative p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all">
-            <Bell className="w-6 h-6" />
+          <button 
+            onClick={() => setShowNotificationsSide(!showNotificationsSide)}
+            className="relative p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+          >
+            {showNotificationsSide ? <X className="w-6 h-6 text-orange-600" /> : <Bell className="w-6 h-6" />}
             <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-          </Link>
+          </button>
 
           {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
@@ -172,14 +177,21 @@ const MerchantLayout = () => {
         </div>
       </header>
 
+      {/* Horizontal Sub-Navbar (Desktop) */}
+      <nav className="hidden md:flex bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 z-20 shrink-0">
+        <div className="flex items-center space-x-2 py-2 overflow-x-auto w-full">
+          {navItems.map((item) => <NavItem key={item.name} item={item} />)}
+        </div>
+      </nav>
+
       {/* Layout Body */}
       <div className="flex flex-1 overflow-hidden relative">
         
-        {/* Sidebar Navigation */}
+        {/* Mobile Sidebar Navigation */}
         <aside className={`
           absolute inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out flex flex-col
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:relative md:translate-x-0
+          md:hidden
         `}>
           <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5">
             <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-4">Main Menu</div>
@@ -188,7 +200,7 @@ const MerchantLayout = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 relative h-[calc(100vh-5rem)]">
+        <main className="flex-1 overflow-y-auto bg-slate-50 relative h-full">
           {/* Mobile Overlay */}
           <AnimatePresence>
             {isMobileMenuOpen && (
@@ -207,6 +219,30 @@ const MerchantLayout = () => {
           </div>
         </main>
       </div>
+
+      {/* Notifications Side Panel */}
+      <AnimatePresence>
+        {showNotificationsSide && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setShowNotificationsSide(false)}
+              className="fixed inset-0 top-20 bg-slate-900/20 backdrop-blur-sm z-30"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+              className="fixed top-20 right-0 w-[28rem] max-w-full h-[calc(100vh-5rem)] bg-white shadow-2xl border-l border-slate-200 z-40 flex flex-col overflow-y-auto"
+            >
+              <NotificationsPanel isSidebar={true} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

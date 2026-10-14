@@ -67,4 +67,18 @@ router.post('/document', protect, upload.single('document'), async (req, res) =>
   }
 });
 
+router.post('/test', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
+    const result = await cloudinary.uploader.upload(dataURI, { folder: 'flashfood_test' });
+    res.status(200).json({ success: true, url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message, stack: error.stack });
+  }
+});
+
 export default router;

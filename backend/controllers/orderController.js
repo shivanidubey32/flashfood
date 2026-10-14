@@ -1,30 +1,51 @@
 import asyncHandler from '../middlewares/asyncHandler.js';
 import Order from '../models/Order.js';
+import Notification from '../models/Notification.js';
+import User from '../models/User.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private/Customer
 export const createOrder = asyncHandler(async (req, res) => {
-  const { orderItems, pickupMethod, merchantId, totalPrice } = req.body;
+  const { orderItems, pickupMethod, deliveryAddress, paymentMethod, isPaid, merchantId, totalPrice } = req.body;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
   } else {
+    const merchantUser = await User.findById(merchantId);
+    const autoAccept = merchantUser?.merchantPreferences?.autoAcceptOrders;
+
     const order = new Order({
       orderItems,
       customer: req.user._id,
       merchant: merchantId,
       pickupMethod,
+      deliveryAddress,
+      paymentMethod: paymentMethod || 'Card',
       totalPrice,
-      isPaid: false // Usually updated after payment gateway success
+      isPaid: isPaid || false,
+      status: autoAccept ? 'Accepted' : 'Pending'
     });
 
     const createdOrder = await order.save();
     
-    // Emit real-time notification to merchant if Socket.io is attached
-    if (req.io) {
-      req.io.emit(`merchant-order-${merchantId}`, createdOrder);
+    const sendOrderAlerts = merchantUser?.notificationPreferences?.orderAlerts !== false;
+    
+    if (sendOrderAlerts) {
+      // Emit real-time notification to merchant if Socket.io is attached
+      if (req.io) {
+        req.io.emit(`merchant-order-${merchantId}`, createdOrder);
+      }
+      
+      // Create DB Notification for Merchant
+      await Notification.create({
+        recipient: merchantId,
+        type: 'Order_Update',
+        title: autoAccept ? 'New Auto-Accepted Order!' : 'New Order Received!',
+        message: `You have received a new order totaling ₹${totalPrice}.`,
+        relatedId: createdOrder._id
+      });
     }
 
     res.status(201).json(createdOrder);

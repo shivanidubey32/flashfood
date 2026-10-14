@@ -77,34 +77,34 @@ const Partners = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPartners.map((p) => (
-          <div key={p.id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col hover:border-slate-300 transition-colors cursor-pointer group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <Store className="w-6 h-6" />
+      <div className="bg-white rounded-[24px] shadow-sm mb-8 overflow-hidden mx-1 border border-slate-100 mt-4">
+        {filteredPartners.map((p, index) => (
+          <div key={p.id} className={`px-5 py-4 flex items-center justify-between cursor-pointer active:bg-slate-50 transition-colors ${index !== filteredPartners.length - 1 ? 'border-b border-slate-100' : ''}`}>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-slate-50 text-slate-700 rounded-full flex items-center justify-center border border-slate-200 mr-4 shrink-0">
+                <Store className="w-5 h-5 stroke-[1.5]" />
               </div>
-              <div className="flex items-center text-amber-500 font-bold bg-amber-50 px-2 py-1 rounded-md text-sm">
-                <Star className="w-4 h-4 mr-1 fill-current" /> {p.rating}
+              <div className="truncate">
+                <h3 className="font-medium text-slate-900 text-[16px] truncate max-w-[200px] sm:max-w-xs">{p.name}</h3>
+                <p className="text-[13px] text-slate-500 flex items-center mt-0.5 truncate max-w-[200px] sm:max-w-xs">
+                  <MapPin className="w-3 h-3 mr-1 shrink-0" /> <span className="truncate">{p.location}</span>
+                </p>
               </div>
             </div>
-            
-            <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1">{p.name}</h3>
-            <p className="text-sm font-medium text-slate-500 mb-4">{p.type}</p>
-            
-            <div className="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center">
-              <span className="text-xs text-slate-500 flex items-center"><MapPin className="w-3 h-3 mr-1" /> {p.location}</span>
-              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">{p.donations} Donations</span>
+            <div className="flex flex-col items-end shrink-0 ml-2">
+              <div className="flex items-center text-amber-500 font-medium text-[13px]">
+                <Star className="w-3 h-3 mr-1 fill-current" /> {p.rating}
+              </div>
+              <span className="text-[11px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-md mt-1">{p.donations} Donations</span>
             </div>
           </div>
         ))}
+        {filteredPartners.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-slate-500 font-medium">No partners found.</p>
+          </div>
+        )}
       </div>
-      
-      {filteredPartners.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-3xl border border-slate-100">
-          <p className="text-slate-500 font-bold">No partners found.</p>
-        </div>
-      )}
 
       {/* Request Partner Modal */}
       <AnimatePresence>

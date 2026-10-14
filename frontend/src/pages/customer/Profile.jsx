@@ -5,21 +5,20 @@ import {
   Package, IndianRupee, Leaf, Star, Clock, Store, 
   Heart, Download, Camera, Home, Briefcase, Plus,
   Settings, HelpCircle, Moon, ChevronRight, Lock, 
-  ShieldCheck, Smartphone, CreditCard, Globe, HeartHandshake, FileText, Trash2, X, CheckCircle, Eye, EyeOff, XCircle, MessageSquare
+  ShieldCheck, Smartphone, CreditCard, Globe, HeartHandshake, FileText, Trash2, X, CheckCircle, Eye, EyeOff, XCircle, MessageSquare, ArrowLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState('menu');
 
   const [userInfo, setUserInfo] = useState(() => {
     return JSON.parse(localStorage.getItem('userInfo')) || {};
   });
 
   const [orders, setOrders] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: userInfo.name || '',
@@ -43,27 +42,19 @@ const Profile = () => {
     newsletter: false
   });
 
-  // Toast Notification State
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  // Settings States
   const [pushNotifications, setPushNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  // Backwards compatibility for data archive
   const isDarkMode = darkMode;
 
-  // Address Modal State
   const [addressModal, setAddressModal] = useState({ show: false, mode: 'add', id: null, type: '', text: '' });
-  
-  // Confirm Modal State
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
-
-  // Settings Modals State
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showFAQModal, setShowFAQModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -73,12 +64,10 @@ const Profile = () => {
   const [complaintLoading, setComplaintLoading] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
   
-  // Location Radar Animation State
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [locationStatus, setLocationStatus] = useState('idle'); // idle, scanning, success, error
+  const [locationStatus, setLocationStatus] = useState('idle');
 
   useEffect(() => {
-    // Check if location is already granted
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         if (result.state === 'granted') {
@@ -108,7 +97,7 @@ const Profile = () => {
             setTimeout(() => {
               setShowLocationModal(false);
             }, 2000);
-          }, 1500); // Fake delay for the cool animation
+          }, 1500);
         },
         (error) => {
           console.error(error);
@@ -127,7 +116,6 @@ const Profile = () => {
       showToast('You need at least 100 points to donate.', 'error');
       return;
     }
-    // Mock donation
     setImpactData(prev => ({ ...prev, rewardPoints: prev.rewardPoints - 100 }));
     setShowDonateModal(false);
     showToast('Successfully donated 100 points! Thank you.');
@@ -140,9 +128,7 @@ const Profile = () => {
 
   const editAddress = (id) => {
     const addr = addresses.find(a => a.id === id);
-    if(addr) {
-      setAddressModal({ show: true, mode: 'edit', id, type: addr.type, text: addr.text });
-    }
+    if(addr) setAddressModal({ show: true, mode: 'edit', id, type: addr.type, text: addr.text });
   };
 
   const deleteAddress = (id) => {
@@ -157,39 +143,22 @@ const Profile = () => {
     });
   };
 
-  const addNewAddress = () => {
-    setAddressModal({ show: true, mode: 'add', id: null, type: 'Other', text: '' });
-  };
+  const addNewAddress = () => setAddressModal({ show: true, mode: 'add', id: null, type: 'Other', text: '' });
 
   const saveAddress = () => {
     if(!addressModal.type || !addressModal.text) return showToast('Please fill all fields', 'error');
-    
     if(addressModal.mode === 'edit') {
       setAddresses(addresses.map(a => a.id === addressModal.id ? { ...a, type: addressModal.type, text: addressModal.text } : a));
       showToast('Address updated successfully!');
     } else {
-      setAddresses([...addresses, { 
-        id: Date.now(), 
-        type: addressModal.type, 
-        icon: MapPin, 
-        color: 'text-slate-600', 
-        bg: 'bg-slate-200', 
-        border: 'border-slate-200', 
-        isDefault: false, 
-        text: addressModal.text 
-      }]);
+      setAddresses([...addresses, { id: Date.now(), type: addressModal.type, icon: MapPin, color: 'text-slate-600', bg: 'bg-slate-200', border: 'border-slate-200', isDefault: false, text: addressModal.text }]);
       showToast('New address added!');
     }
     setAddressModal({ show: false, mode: 'add', id: null, type: '', text: '' });
   };
 
-  // Password Modal State
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -218,16 +187,13 @@ const Profile = () => {
           });
         }
         
-        // Fetch stats
         const { data: ordersData } = await axios.get(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/orders/myorders', config);
         setOrders(ordersData);
         let meals = 0;
         let money = 0;
         const completedOrders = ordersData.filter(order => order.status === 'Completed' || order.status === 'Ready');
         completedOrders.forEach(order => {
-          order.orderItems.forEach(item => {
-            meals += item.qty;
-          });
+          order.orderItems.forEach(item => { meals += item.qty; });
           money += order.totalPrice; 
         });
 
@@ -265,9 +231,7 @@ const Profile = () => {
     setLoading(true);
     try {
       let cleanPhone = formData.phoneNumber.replace(/\D/g, '');
-      if (cleanPhone.length > 10 && cleanPhone.startsWith('91')) {
-        cleanPhone = cleanPhone.slice(-10);
-      }
+      if (cleanPhone.length > 10 && cleanPhone.startsWith('91')) cleanPhone = cleanPhone.slice(-10);
 
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', {
@@ -282,7 +246,6 @@ const Profile = () => {
       setIsEditingProfile(false);
     } catch (error) {
       showToast(error.response?.data?.message || 'Failed to update profile.', 'error');
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -290,10 +253,7 @@ const Profile = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showToast("Passwords do not match!", 'error');
-      return;
-    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) return showToast("Passwords do not match!", 'error');
     setPasswordLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -307,7 +267,6 @@ const Profile = () => {
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       showToast(error.response?.data?.message || 'Failed to update password.', 'error');
-      console.error(error);
     } finally {
       setPasswordLoading(false);
     }
@@ -316,38 +275,42 @@ const Profile = () => {
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const formDataUpload = new FormData();
     formDataUpload.append('image', file);
 
     try {
       setLoading(true);
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-
+      const config = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await axios.post(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/upload', formDataUpload, config);
       
-      // Update the user profile with the new image URL
       const updateConfig = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', {
-        profilePicture: data.image
-      }, updateConfig);
+      await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', { profilePicture: data.image }, updateConfig);
 
       setFormData({ ...formData, profilePicture: data.image });
-      
-      // Update local storage
       const updatedInfo = { ...userInfo, profilePicture: data.image };
       localStorage.setItem('userInfo', JSON.stringify(updatedInfo));
       setUserInfo(updatedInfo);
-      
       showToast('Profile photo updated successfully!');
     } catch (error) {
-      console.error(error);
       showToast('Error uploading photo', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    try {
+      setLoading(true);
+      const updateConfig = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', { profilePicture: '' }, updateConfig);
+
+      setFormData({ ...formData, profilePicture: '' });
+      const updatedInfo = { ...userInfo, profilePicture: '' };
+      localStorage.setItem('userInfo', JSON.stringify(updatedInfo));
+      setUserInfo(updatedInfo);
+      showToast('Profile photo removed successfully!');
+    } catch (error) {
+      showToast('Error removing photo', 'error');
     } finally {
       setLoading(false);
     }
@@ -359,15 +322,9 @@ const Profile = () => {
       let payload = {};
       
       if (type === 'push' || type === 'marketing') {
-        payload.notificationPreferences = {
-          pushNotifications: type === 'push' ? value : pushNotifications,
-          promotions: type === 'marketing' ? value : marketingEmails
-        };
+        payload.notificationPreferences = { pushNotifications: type === 'push' ? value : pushNotifications, promotions: type === 'marketing' ? value : marketingEmails };
       } else if (type === 'dark' || type === 'location') {
-        payload.customerPreferences = {
-          darkMode: type === 'dark' ? value : darkMode,
-          locationTracking: type === 'location' ? value : locationGranted
-        };
+        payload.customerPreferences = { darkMode: type === 'dark' ? value : darkMode, locationTracking: type === 'location' ? value : locationGranted };
       }
 
       await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', payload, config);
@@ -376,40 +333,20 @@ const Profile = () => {
     }
   };
 
-  const togglePush = () => {
-    setPushNotifications(!pushNotifications);
-    handlePreferenceUpdate('push', !pushNotifications);
-  };
-  
-  const toggleMarketing = () => {
-    setMarketingEmails(!marketingEmails);
-    handlePreferenceUpdate('marketing', !marketingEmails);
-  };
-
-  const toggleDarkMode = () => {
-    const isDark = document.documentElement.classList.toggle('dark-theme');
-    setDarkMode(!darkMode);
-    handlePreferenceUpdate('dark', !darkMode);
-  };
-
-  const toggleLocation = () => {
-    setLocationGranted(!locationGranted);
-    handlePreferenceUpdate('location', !locationGranted);
-  };
+  const togglePush = () => { setPushNotifications(!pushNotifications); handlePreferenceUpdate('push', !pushNotifications); };
+  const toggleMarketing = () => { setMarketingEmails(!marketingEmails); handlePreferenceUpdate('marketing', !marketingEmails); };
+  const toggleDarkMode = () => { document.documentElement.classList.toggle('dark-theme'); setDarkMode(!darkMode); handlePreferenceUpdate('dark', !darkMode); };
+  const toggleLocation = () => { setLocationGranted(!locationGranted); handlePreferenceUpdate('location', !locationGranted); };
 
   const handleNotificationToggle = async (key) => {
     const newPrefs = { ...notificationPrefs, [key]: !notificationPrefs[key] };
     setNotificationPrefs(newPrefs);
-    
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', {
-        notificationPreferences: newPrefs
-      }, config);
+      await axios.put(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/auth/profile', { notificationPreferences: newPrefs }, config);
       showToast('Notification preferences updated!');
     } catch (error) {
       showToast('Failed to update preferences', 'error');
-      // Revert state on error
       setNotificationPrefs(notificationPrefs);
     }
   };
@@ -417,52 +354,29 @@ const Profile = () => {
   const handleDownloadData = async () => {
     try {
       showToast('Preparing your data archive...', 'success');
-      
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      
-      // Fetch user's orders
       const { data: ordersData } = await axios.get(((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + '/api/orders/myorders', config);
       
-      // Construct the comprehensive data object
       const dataArchive = {
-        personal_information: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phoneNumber,
-          account_type: userInfo.role
-        },
-        preferences: {
-          notifications: notificationPrefs,
-          theme: isDarkMode ? 'dark' : 'light'
-        },
-        impact_metrics: {
-          total_orders: impactData.totalOrders,
-          total_savings_inr: impactData.totalSavings,
-          meals_rescued: impactData.mealsRescued,
-          reward_points: impactData.rewardPoints
-        },
+        personal_information: { name: formData.name, email: formData.email, phone: formData.phoneNumber, account_type: userInfo.role },
+        preferences: { notifications: notificationPrefs, theme: isDarkMode ? 'dark' : 'light' },
+        impact_metrics: { total_orders: impactData.totalOrders, total_savings_inr: impactData.totalSavings, meals_rescued: impactData.mealsRescued, reward_points: impactData.rewardPoints },
         order_history: ordersData
       };
       
-      // Convert to JSON and create blob
       const jsonString = JSON.stringify(dataArchive, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
-      // Trigger download
       const a = document.createElement('a');
       a.href = url;
       a.download = `flashfood_data_${(formData.name || 'user').replace(/\s+/g, '_').toLowerCase()}.json`;
       document.body.appendChild(a);
       a.click();
-      
-      // Cleanup
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
       showToast('Data downloaded successfully!', 'success');
     } catch (error) {
-      console.error(error);
       showToast('Error downloading data.', 'error');
     }
   };
@@ -472,27 +386,29 @@ const Profile = () => {
     navigate('/login');
   };
 
-  const tabs = [
-    { id: 'personal', icon: User, label: 'Personal Info' },
-    { id: 'orders', icon: Package, label: 'Order History' },
-    { id: 'addresses', icon: MapPin, label: 'Saved Addresses' },
-    { id: 'favorites', icon: Heart, label: 'Favorite Stores' },
-    { id: 'notifications', icon: Bell, label: 'Notifications' },
-    { id: 'impact', icon: Leaf, label: 'Rewards & Impact' },
-    { id: 'settings', icon: Settings, label: 'Account Settings' }
-  ];
+  const MenuItem = ({ icon: Icon, label, onClick, border = true }) => (
+    <div 
+      onClick={onClick}
+      className={`px-5 py-4 flex items-center justify-between cursor-pointer active:bg-slate-50 transition-colors ${border ? 'border-b border-slate-100' : ''}`}
+    >
+      <div className="flex items-center text-slate-700">
+        <Icon className="w-5 h-5 mr-4 text-slate-400 stroke-[1.5]" />
+        <span className="text-[15px]">{label}</span>
+      </div>
+      <ChevronRight className="w-4 h-4 text-slate-300 stroke-[2]" />
+    </div>
+  );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 mb-20 relative">
+    <div className="w-full px-4 py-8 mb-20 relative bg-slate-50 min-h-[80vh]">
       
-      {/* Toast Notification */}
       <AnimatePresence>
         {toast.show && (
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full font-bold shadow-lg flex items-center space-x-2 ${
+            className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-full font-bold shadow-lg flex items-center space-x-2 ${
               toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
             }`}
           >
@@ -502,107 +418,80 @@ const Profile = () => {
         )}
       </AnimatePresence>
 
-      {/* Top Dashboard Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {[
-          { icon: Package, label: 'Total Orders', value: impactData.totalOrders.toString(), color: 'text-blue-500', bg: 'bg-blue-100' },
-          { icon: IndianRupee, label: 'Total Savings', value: `₹${impactData.totalSavings}`, color: 'text-green-500', bg: 'bg-green-100' },
-          { icon: Leaf, label: 'Meals Rescued', value: impactData.mealsRescued.toString(), color: 'text-teal-500', bg: 'bg-teal-100' },
-          { icon: Star, label: 'Reward Points', value: impactData.rewardPoints.toString(), color: 'text-amber-500', bg: 'bg-amber-100' }
-        ].map((stat, idx) => (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            key={idx} 
-            className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center"
-          >
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${stat.bg}`}>
-              <stat.icon className={`w-6 h-6 ${stat.color}`} />
-            </div>
-            <p className="text-2xl font-black text-slate-900">{stat.value}</p>
-            <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        
-        {/* Left Sidebar */}
-        <div className="md:col-span-1 space-y-4">
-          {/* Profile Summary Card */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-red-500 to-orange-500 opacity-10"></div>
+      {/* Main Menu View */}
+      {activeTab === 'menu' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {/* Top Profile Card */}
+          <div className="bg-[#1c1c1c] rounded-[24px] mb-6 shadow-md relative overflow-hidden text-white mx-1 mt-2">
+            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-amber-500/10 to-transparent opacity-50"></div>
             
-            <div className="relative mb-4">
-              {formData.profilePicture ? (
-                <img 
-                  src={((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + formData.profilePicture} 
-                  alt={userInfo.name} 
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md relative z-10"
-                />
-              ) : (
-                <div className="w-24 h-24 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-4xl font-black border-4 border-white shadow-md relative z-10">
-                  {userInfo.name ? userInfo.name.charAt(0) : 'U'}
-                </div>
-              )}
-              
-              <label className="absolute bottom-0 right-0 bg-slate-900 text-white p-2 rounded-full shadow-lg z-20 hover:bg-slate-800 transition-colors cursor-pointer">
-                <Camera className="w-4 h-4" />
-                <input 
-                  type="file" 
-                  onChange={uploadFileHandler}
-                  className="hidden" 
-                  accept="image/*"
-                />
-              </label>
-            </div>
-            
-            <h2 className="text-xl font-bold text-slate-900">{userInfo.name}</h2>
-            <p className="text-slate-500 text-sm font-medium mt-1">Member since {userInfo.joined}</p>
-            <span className="mt-3 px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">
-              Active Account
-            </span>
-          </div>
-
-          {/* Navigation Menu */}
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden py-2">
-            {tabs.map((tab) => (
-              <div 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 cursor-pointer flex items-center transition-colors font-medium border-l-4 ${
-                  activeTab === tab.id 
-                    ? 'border-red-500 bg-red-50 text-red-600' 
-                    : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-red-500' : 'text-slate-400'}`} />
-                {tab.label}
-              </div>
-            ))}
-            <div className="h-px bg-slate-100 my-2 mx-4"></div>
-            <div 
-              onClick={handleLogout}
-              className="px-6 py-4 hover:bg-red-50 cursor-pointer flex items-center text-red-500 font-medium transition-colors border-l-4 border-transparent"
-            >
-              <LogOut className="w-5 h-5 mr-3" /> Sign Out
+            <div className="p-5 flex justify-between items-start relative z-10 pt-6">
+               <div className="flex items-center space-x-5">
+                 <div className="relative">
+                   {formData.profilePicture ? (
+                     <img 
+                       src={formData.profilePicture.startsWith('http') ? formData.profilePicture : (((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + formData.profilePicture)} 
+                       alt={userInfo.name} 
+                       className="w-[72px] h-[72px] rounded-full object-cover border-2 border-amber-200/50"
+                     />
+                   ) : (
+                     <div className="w-[72px] h-[72px] bg-gradient-to-br from-amber-50 to-amber-200 text-amber-700 rounded-full flex items-center justify-center text-3xl font-medium shadow-inner">
+                       {userInfo.name ? userInfo.name.charAt(0) : 'U'}
+                     </div>
+                   )}
+                 </div>
+                 <div className="flex flex-col justify-center">
+                   <h2 className="text-[22px] font-semibold text-white tracking-wide">{userInfo.name}</h2>
+                   <button onClick={() => setActiveTab('personal')} className="text-[13px] text-white/90 font-medium flex items-center mt-1">
+                     Edit profile <ChevronRight className="w-3 h-3 ml-0.5" />
+                   </button>
+                 </div>
+               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Content Area */}
-        <div className="md:col-span-3">
-          <motion.div 
-            key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 min-h-[500px]"
-          >
-            
-            {/* TAB: Personal Info */}
-            {activeTab === 'personal' && (
+          {/* Main List Sections */}
+          <div className="bg-white rounded-[24px] shadow-sm mb-8 overflow-hidden pt-4 pb-2 mx-1">
+            {/* Section 1: Food Rescue & Impact */}
+            <div className="flex items-center space-x-3 mb-2 px-5 mt-2">
+              <div className="w-1 h-5 bg-green-700 rounded-full"></div>
+              <h3 className="font-medium text-slate-800 text-lg">Your Activity</h3>
+            </div>
+            <div className="px-1">
+               <MenuItem icon={Package} label="Your Order History" onClick={() => setActiveTab('orders')} />
+               <MenuItem icon={Leaf} label="Your Impact & Rewards" onClick={() => setActiveTab('impact')} />
+               <MenuItem icon={MapPin} label="Saved Addresses" onClick={() => setActiveTab('addresses')} />
+               <MenuItem icon={Heart} label="Favorite Stores" onClick={() => setActiveTab('favorites')} border={false} />
+            </div>
+
+            <div className="h-2 bg-slate-50 w-full my-2"></div>
+
+            {/* Section 2: More */}
+            <div className="flex items-center space-x-3 mb-2 px-5 mt-4">
+              <div className="w-1 h-5 bg-green-700 rounded-full"></div>
+              <h3 className="font-medium text-slate-800 text-lg">More</h3>
+            </div>
+            <div className="px-1">
+               <MenuItem icon={HelpCircle} label="Online Ordering Help" onClick={() => setShowFAQModal(true)} />
+               <MenuItem icon={MessageSquare} label="Send Feedback" onClick={() => setShowComplaintModal(true)} />
+               <MenuItem icon={Settings} label="App Settings" onClick={() => setActiveTab('settings')} />
+               <MenuItem icon={FileText} label="Terms & Privacy Policy" onClick={() => setShowTermsModal(true)} />
+               <MenuItem icon={LogOut} label="Log out" onClick={handleLogout} border={false} />
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Subviews */}
+      {activeTab !== 'menu' && (
+         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+           <button onClick={() => setActiveTab('menu')} className="flex items-center text-slate-500 hover:text-slate-900 mb-6 font-bold transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 inline-flex">
+             <ArrowLeft className="w-4 h-4 mr-2" /> Back
+           </button>
+           
+           <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 min-h-[500px]">
+             {/* Render activeTab content exactly as it was */}
+             {activeTab === 'personal' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-black text-slate-900">Personal Information</h3>
@@ -610,90 +499,76 @@ const Profile = () => {
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
                     className={`flex items-center font-bold transition-colors px-4 py-2 rounded-xl ${isEditingProfile ? 'text-slate-500 bg-slate-100 hover:text-slate-700' : 'text-red-500 bg-red-50 hover:text-red-600'}`}
                   >
-                    {isEditingProfile ? (
-                      <>Cancel</>
-                    ) : (
-                      <><Edit2 className="w-4 h-4 mr-2" /> Edit</>
-                    )}
+                    {isEditingProfile ? <>Cancel</> : <><Edit2 className="w-4 h-4 mr-2" /> Edit</>}
                   </button>
                 </div>
                 
-                <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mb-6 flex justify-center">
+                  <div className="relative inline-block">
+                    {formData.profilePicture ? (
+                      <img src={formData.profilePicture.startsWith('http') ? formData.profilePicture : (((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'))) + formData.profilePicture)} alt={userInfo.name} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md relative z-10" />
+                    ) : (
+                      <div className="w-24 h-24 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-4xl font-black border-4 border-white shadow-md relative z-10">
+                        {userInfo.name ? userInfo.name.charAt(0) : 'U'}
+                      </div>
+                    )}
+                    <label className="absolute bottom-0 right-0 bg-slate-900 text-white p-2 rounded-full shadow-lg z-20 hover:bg-slate-800 transition-colors cursor-pointer">
+                      <Camera className="w-4 h-4" />
+                      <input type="file" onChange={uploadFileHandler} className="hidden" accept="image/*" />
+                    </label>
+                    {formData.profilePicture && (
+                      <button 
+                        onClick={handleRemoveImage} 
+                        className="absolute bottom-0 left-0 bg-red-500 text-white p-2 rounded-full shadow-lg z-20 hover:bg-red-600 transition-colors"
+                        title="Remove profile picture"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <form onSubmit={handleProfileUpdate} className="space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input 
-                        type="text" 
-                        value={formData.name} 
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        disabled={!isEditingProfile}
-                        className={`w-full pl-12 pr-4 py-3.5 rounded-xl font-medium focus:outline-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`} 
-                      />
+                      <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} disabled={!isEditingProfile} className={`w-full pl-12 pr-4 py-3 rounded-xl font-medium focus:outline-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`} />
                     </div>
                   </div>
-                  
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input 
-                        type="email" 
-                        value={formData.email} 
-                        disabled
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl font-medium focus:outline-none cursor-not-allowed" 
-                      />
+                      <input type="email" value={formData.email} disabled className="w-full pl-12 pr-4 py-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl font-medium focus:outline-none cursor-not-allowed" />
                     </div>
                   </div>
-                  
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
                     <div className="relative">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input 
-                        type="tel" 
-                        value={formData.phoneNumber} 
-                        onChange={(e) => setFormData({...formData, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 10)})}
-                        disabled={!isEditingProfile}
-                        pattern="[0-9]{10}"
-                        maxLength="10"
-                        title="Please enter exactly 10 digits"
-                        className={`w-full pl-12 pr-4 py-3.5 rounded-xl font-medium focus:outline-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`} 
-                      />
+                      <input type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({...formData, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 10)})} disabled={!isEditingProfile} pattern="[0-9]{10}" maxLength="10" title="Please enter exactly 10 digits" className={`w-full pl-12 pr-4 py-3 rounded-xl font-medium focus:outline-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`} />
                     </div>
                   </div>
-
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Primary Address</label>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-4 w-5 h-5 text-slate-400" />
-                      <textarea 
-                        value={formData.address} 
-                        onChange={(e) => setFormData({...formData, address: e.target.value})}
-                        rows="2" 
-                        disabled={!isEditingProfile}
-                        className={`w-full pl-12 pr-4 py-3.5 rounded-xl font-medium focus:outline-none resize-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`}
-                      ></textarea>
+                      <textarea value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} rows="2" disabled={!isEditingProfile} className={`w-full pl-12 pr-4 py-3 rounded-xl font-medium focus:outline-none resize-none transition-colors ${isEditingProfile ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-red-500' : 'bg-transparent border border-transparent text-slate-800'}`}></textarea>
                     </div>
                   </div>
-
                   {isEditingProfile && (
-                    <div className="md:col-span-2 mt-4 pt-6 border-t border-slate-100">
-                      <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="bg-slate-900 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-70"
-                      >
+                    <div className="mt-4 pt-6 border-t border-slate-100">
+                      <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-70">
                         {loading ? 'Saving...' : 'Save Changes'}
                       </button>
                     </div>
                   )}
                 </form>
               </div>
-            )}
+             )}
 
-            {/* TAB: Order History */}
-            {activeTab === 'orders' && (
+             {activeTab === 'orders' && (
               <div>
                 <h3 className="text-2xl font-black text-slate-900 mb-6">Order History</h3>
                 <div className="space-y-4">
@@ -708,450 +583,241 @@ const Profile = () => {
                       case 'Ready': color = 'text-indigo-600'; bg = 'bg-indigo-100'; break;
                       default: color = 'text-blue-600'; bg = 'bg-blue-100';
                     }
-
                     return (
-                      <div key={order._id || idx} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-slate-200 shrink-0">
-                            <Package className="w-6 h-6 text-slate-400" />
-                          </div>
-                          <div>
-                            <div className="flex items-center space-x-2">
-                            <h4 className="font-bold text-slate-900">{order.merchant?.businessName || order.merchant?.name || 'Store'}</h4>
-                              <span className="text-xs text-slate-400 font-medium">• {new Date(order.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            <p className="text-sm text-slate-500">{order.orderItems.map(i => i.name).join(', ')}</p>
-                            <div className="flex items-center mt-2 md:hidden">
-                              <span className={`text-xs font-bold px-2 py-1 rounded-md ${bg} ${color}`}>{order.status}</span>
-                              <span className="ml-3 font-black text-slate-900">₹{order.totalPrice}</span>
-                            </div>
-                          </div>
+                      <div key={order._id || idx} className="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div className="flex items-start justify-between mb-3">
+                           <div className="flex items-center space-x-3">
+                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 shrink-0"><Package className="w-5 h-5 text-slate-400" /></div>
+                             <div>
+                               <h4 className="font-bold text-slate-900">{order.merchant?.businessName || order.merchant?.name || 'Store'}</h4>
+                               <span className="text-xs text-slate-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <div className="font-black text-slate-900">₹{order.totalPrice}</div>
+                             <div className={`mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md inline-block ${bg} ${color}`}>{order.status}</div>
+                           </div>
                         </div>
-                        
-                        <div className="hidden md:flex flex-col items-end">
-                          <span className="font-black text-lg text-slate-900">₹{order.totalPrice}</span>
-                          <span className={`mt-1 text-xs font-bold px-2.5 py-1 rounded-md ${bg} ${color}`}>{order.status}</span>
-                        </div>
-                        
-                        <div className="w-full md:w-auto mt-4 md:mt-0 flex space-x-2">
-                          <button onClick={() => navigate('/customer/orders')} className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:text-red-500 hover:border-red-200 transition-colors text-center">
-                            Track
-                          </button>
-                          <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                            <Download className="w-5 h-5" />
-                          </button>
+                        <p className="text-sm text-slate-500 mb-3">{order.orderItems.map(i => i.name).join(', ')}</p>
+                        <div className="flex space-x-2 mt-auto">
+                          <button onClick={() => navigate('/customer/orders')} className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:text-red-500 transition-colors text-center">Track</button>
+                          <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"><Download className="w-5 h-5" /></button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            )}
+             )}
 
-            {/* TAB: Saved Addresses */}
-            {activeTab === 'addresses' && (
+             {activeTab === 'addresses' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-black text-slate-900">Saved Addresses</h3>
-                  <button onClick={addNewAddress} className="flex items-center text-white font-bold bg-slate-900 hover:bg-slate-800 transition-colors px-4 py-2 rounded-xl shadow-md">
-                    <Plus className="w-4 h-4 mr-2" /> Add New
+                  <button onClick={addNewAddress} className="flex items-center text-white font-bold bg-slate-900 hover:bg-slate-800 transition-colors px-3 py-2 rounded-lg shadow-sm text-sm">
+                    <Plus className="w-4 h-4 mr-1" /> Add
                   </button>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {addresses.length === 0 ? (
-                    <div className="col-span-full text-center py-8 text-slate-500">No saved addresses found.</div>
+                    <div className="text-center py-8 text-slate-500">No saved addresses found.</div>
                   ) : addresses.map((addr) => {
                     const Icon = addr.icon;
                     return (
-                      <div key={addr.id} className={`p-6 bg-slate-50 rounded-3xl border-2 ${addr.border} relative`}>
-                        {addr.isDefault && <div className="absolute top-4 right-4 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-md">Default</div>}
-                        <div className="flex items-center mb-4">
-                          <div className={`w-10 h-10 ${addr.bg} ${addr.color} rounded-full flex items-center justify-center mr-3`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <h4 className="font-bold text-slate-900 text-lg">{addr.type}</h4>
+                      <div key={addr.id} className={`p-5 bg-slate-50 rounded-2xl border-2 ${addr.border} relative`}>
+                        {addr.isDefault && <div className="absolute top-4 right-4 bg-red-100 text-red-600 text-[10px] uppercase tracking-wide font-bold px-2 py-1 rounded-md">Default</div>}
+                        <div className="flex items-center mb-3">
+                          <div className={`w-8 h-8 ${addr.bg} ${addr.color} rounded-full flex items-center justify-center mr-3`}><Icon className="w-4 h-4" /></div>
+                          <h4 className="font-bold text-slate-900">{addr.type}</h4>
                         </div>
-                        <p className="text-slate-600 text-sm mb-6 leading-relaxed whitespace-pre-line">
-                          {addr.text}
-                        </p>
-                        <div className="flex space-x-3">
-                          <button onClick={() => editAddress(addr.id)} className="flex-1 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50">Edit</button>
-                          <button onClick={() => deleteAddress(addr.id)} className="flex-1 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50">Delete</button>
+                        <p className="text-slate-600 text-sm mb-4 whitespace-pre-line">{addr.text}</p>
+                        <div className="flex space-x-2">
+                          <button onClick={() => editAddress(addr.id)} className="flex-1 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50">Edit</button>
+                          <button onClick={() => deleteAddress(addr.id)} className="flex-1 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-red-500 hover:bg-red-50">Delete</button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            )}
+             )}
 
-            {/* TAB: Favorite Stores */}
-            {activeTab === 'favorites' && (
+             {activeTab === 'favorites' && (
               <div>
                 <h3 className="text-2xl font-black text-slate-900 mb-6">Favorite Stores</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   {[
                     { name: 'Wok Master', type: 'Chinese', rating: '4.8', img: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=500' },
                     { name: 'Pizza Paradise', type: 'Italian', rating: '4.5', img: 'https://images.unsplash.com/photo-1574936145840-28808d77a0b6?q=80&w=500' },
                     { name: 'South Indian Delights', type: 'South Indian', rating: '4.9', img: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=500' }
                   ].map((store, idx) => (
-                    <div key={idx} className="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 flex flex-col">
-                      <div className="h-32 relative">
+                    <div key={idx} className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex items-center p-3">
+                      <div className="w-20 h-20 shrink-0 relative rounded-xl overflow-hidden">
                         <img src={store.img} alt={store.name} className="w-full h-full object-cover" />
-                        <button className="absolute top-3 right-3 bg-white p-2 rounded-full text-red-500 shadow-md">
-                          <Heart className="w-4 h-4 fill-current" />
-                        </button>
                       </div>
-                      <div className="p-5 flex-1 flex flex-col justify-between">
-                        <div>
-                          <h4 className="text-lg font-black text-slate-900">{store.name}</h4>
-                          <p className="text-sm text-slate-500 font-medium mb-3">{store.type} • ⭐ {store.rating}</p>
+                      <div className="pl-4 flex-1">
+                        <div className="flex justify-between items-start">
+                           <div>
+                             <h4 className="text-base font-black text-slate-900">{store.name}</h4>
+                             <p className="text-xs text-slate-500 font-medium mb-1">{store.type} • ⭐ {store.rating}</p>
+                           </div>
+                           <button className="bg-white p-1.5 rounded-full text-red-500 shadow-sm border border-slate-100">
+                             <Heart className="w-4 h-4 fill-current" />
+                           </button>
                         </div>
-                        <button className="w-full py-2.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors mt-auto">
-                          View Active Deals
-                        </button>
+                        <button className="text-xs text-red-500 font-bold hover:underline">View Deals</button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+             )}
 
-            {/* TAB: Notifications */}
-            {activeTab === 'notifications' && (
+             {activeTab === 'impact' && (
               <div>
-                <h3 className="text-2xl font-black text-slate-900 mb-6">Notification Preferences</h3>
-                <div className="space-y-4">
+                <h3 className="text-2xl font-black text-slate-900 mb-6">Your Impact</h3>
+                <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden mb-6 shadow-xl">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-green-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
+                  <div className="relative z-10 flex flex-col justify-between">
+                    <div>
+                      <p className="text-green-400 font-bold mb-1 uppercase tracking-wider text-xs">Hero Level {Math.floor(impactData.rewardPoints / 150) + 1}</p>
+                      <h4 className="text-3xl font-black mb-2">{impactData.rewardPoints} <span className="text-base text-slate-400 font-medium">Points</span></h4>
+                      <p className="text-slate-400 text-xs">{150 - (impactData.rewardPoints % 150)} points to Level {Math.floor(impactData.rewardPoints / 150) + 2} Rewards</p>
+                    </div>
+                    <button className="mt-4 w-full py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-sm">Redeem Points</button>
+                  </div>
+                  <div className="relative z-10 mt-6"><div className="w-full bg-slate-800 rounded-full h-2"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full" style={{ width: `${(impactData.rewardPoints % 150) / 150 * 100}%` }}></div></div></div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                     <Package className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                     <p className="text-2xl font-black text-slate-900">{impactData.totalOrders}</p>
+                     <p className="text-xs font-bold text-slate-500">Orders</p>
+                   </div>
+                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                     <IndianRupee className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                     <p className="text-2xl font-black text-slate-900">₹{impactData.totalSavings}</p>
+                     <p className="text-xs font-bold text-slate-500">Savings</p>
+                   </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-3 flex items-center">
+                  <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-3 shrink-0"><Leaf className="w-5 h-5 text-teal-600" /></div>
+                  <div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-0.5">Food Saved</p><p className="text-lg font-black text-slate-900">{(impactData.mealsRescued * 0.5).toFixed(1)} kg</p></div>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 shrink-0"><Star className="w-5 h-5 text-blue-600" /></div>
+                  <div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-0.5">CO₂ Reduced</p><p className="text-lg font-black text-slate-900">{(impactData.mealsRescued * 1.25).toFixed(1)} kg</p></div>
+                </div>
+              </div>
+             )}
+
+             {activeTab === 'settings' && (
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 mb-6">Settings</h3>
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Security</h4>
+                    <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                      <div onClick={() => setShowPasswordModal(true)} className="p-4 flex items-center justify-between border-b border-slate-100 hover:bg-slate-100 cursor-pointer transition-colors"><div className="flex items-center"><Lock className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Change Password</span></div><ChevronRight className="w-4 h-4 text-slate-300" /></div>
+                      <div className="p-4 flex items-center justify-between border-b border-slate-100 hover:bg-slate-100 cursor-pointer transition-colors"><div className="flex items-center"><ShieldCheck className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Two-Factor Auth</span></div><span className="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-500 rounded">Disabled</span></div>
+                      <div className="p-4 flex items-center justify-between hover:bg-slate-100 cursor-pointer transition-colors"><div className="flex items-center"><Smartphone className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Logged Devices</span></div><span className="text-[10px] font-bold text-red-500 hover:underline">Logout all</span></div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Preferences</h4>
+                    <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                      <div className="p-4 flex items-center justify-between border-b border-slate-100"><div className="flex items-center"><Globe className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Language</span></div><span className="text-xs text-slate-500 font-medium">English</span></div>
+                      <div className="p-4 flex items-center justify-between border-b border-slate-100"><div className="flex items-center"><Moon className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Dark Mode</span></div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" checked={darkMode} onChange={toggleDarkMode} />
+                          <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-800"></div>
+                        </label>
+                      </div>
+                      <div className="p-4 flex items-center justify-between border-b border-slate-100"><div className="flex items-center"><Bell className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Push Notifications</span></div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" checked={pushNotifications} onChange={togglePush} className="sr-only peer" />
+                          <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500"></div>
+                        </label>
+                      </div>
+                      <div className="p-4 flex items-center justify-between border-b border-slate-100" onClick={toggleLocation}><div className="flex items-center"><MapPin className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Location Permissions</span></div>
+                        {locationGranted ? <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-600 rounded">Granted</span> : <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-500 rounded">Request</span>}
+                      </div>
+                      <div onClick={() => setActiveTab('notifications')} className="p-4 flex items-center justify-between hover:bg-slate-100 cursor-pointer transition-colors"><div className="flex items-center"><Bell className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Advanced Alerts</span></div><ChevronRight className="w-4 h-4 text-slate-300" /></div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Data & Actions</h4>
+                    <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                      <div onClick={handleDownloadData} className="p-4 flex items-center justify-between border-b border-slate-100 hover:bg-slate-100 cursor-pointer transition-colors"><div className="flex items-center"><Download className="w-4 h-4 text-slate-400 mr-3" /><span className="font-semibold text-slate-700 text-sm">Download My Data</span></div><ChevronRight className="w-4 h-4 text-slate-300" /></div>
+                      <div className="p-4 flex items-center justify-between hover:bg-red-50 cursor-pointer transition-colors"><div className="flex items-center"><Trash2 className="w-4 h-4 text-red-500 mr-3" /><span className="font-semibold text-red-600 text-sm">Delete Account</span></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+             )}
+
+             {activeTab === 'notifications' && (
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 mb-6">Advanced Alerts</h3>
+                <div className="space-y-3">
                   {[
                     { id: 'dealAlerts', title: 'Deal Alerts', desc: 'Get notified when new food is listed near you.' },
                     { id: 'orderUpdates', title: 'Order Updates', desc: 'Track your order status and pickup reminders.' },
                     { id: 'flashSales', title: 'Flash Sales', desc: 'Alerts for extreme discounts (80%+ off).' },
                     { id: 'newsletter', title: 'Newsletter', desc: 'Weekly roundup of your impact and savings.' }
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-lg">{item.title}</h4>
-                        <p className="text-sm text-slate-500">{item.desc}</p>
+                    <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="pr-4">
+                        <h4 className="font-bold text-slate-900 text-sm">{item.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="sr-only peer" 
-                          checked={notificationPrefs[item.id]} 
-                          onChange={() => handleNotificationToggle(item.id)}
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" className="sr-only peer" checked={notificationPrefs[item.id]} onChange={() => handleNotificationToggle(item.id)} />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
                       </label>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* TAB: Rewards & Impact */}
-            {activeTab === 'impact' && (
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 mb-6">Your Impact & Rewards</h3>
-                
-                <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden mb-8 shadow-xl">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between">
-                    <div>
-                      <p className="text-green-400 font-bold mb-1 uppercase tracking-wider text-sm">
-                        FlashFood Hero Level {Math.floor(impactData.rewardPoints / 150) + 1}
-                      </p>
-                      <h4 className="text-4xl font-black mb-2">{impactData.rewardPoints} <span className="text-xl text-slate-400 font-medium">Points</span></h4>
-                      <p className="text-slate-400 text-sm">
-                        {150 - (impactData.rewardPoints % 150)} points away from Level {Math.floor(impactData.rewardPoints / 150) + 2} Rewards!
-                      </p>
-                    </div>
-                    <div className="mt-6 md:mt-0">
-                      <button className="px-6 py-3 bg-white text-slate-900 font-bold rounded-full hover:bg-slate-100 transition-colors shadow-lg">
-                        Redeem Points
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="relative z-10 mt-8">
-                    <div className="w-full bg-slate-800 rounded-full h-3">
-                      <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full" style={{ width: `${(impactData.rewardPoints % 150) / 150 * 100}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                <h4 className="font-bold text-slate-900 mb-4 text-lg">Environmental Impact</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center">
-                    <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mr-4 shrink-0">
-                      <Leaf className="w-7 h-7 text-teal-600" />
-                    </div>
-                    <div>
-                      <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-1">Food Saved</p>
-                      <p className="text-2xl font-black text-slate-900">{(impactData.mealsRescued * 0.5).toFixed(1)} kg</p>
-                    </div>
-                  </div>
-                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center">
-                    <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mr-4 shrink-0">
-                      <Star className="w-7 h-7 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-1">CO₂ Reduced</p>
-                      <p className="text-2xl font-black text-slate-900">{(impactData.mealsRescued * 1.25).toFixed(1)} kg</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB: Account Settings */}
-            {activeTab === 'settings' && (
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 mb-6">Account Settings</h3>
-                
-                <div className="space-y-8">
-                  {/* Security Settings */}
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Security</h4>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div 
-                        onClick={() => setShowPasswordModal(true)}
-                        className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors"
-                      >
-                        <div className="flex items-center"><Lock className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Change Password</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><ShieldCheck className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Two-Factor Authentication</span></div>
-                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-md">Disabled</span>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition-colors">
-                        <div className="flex items-center"><Smartphone className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Logged Devices</span></div>
-                        <span className="text-xs font-bold text-red-500 hover:underline">Logout all</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Payment Settings */}
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Payment Methods</h4>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><CreditCard className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Saved Cards</span></div>
-                        <span className="text-sm text-slate-500">2 ending in 4242</span>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition-colors">
-                        <div className="flex items-center"><Smartphone className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">UPI IDs</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* App Preferences */}
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">App Preferences</h4>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><Globe className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Language</span></div>
-                        <span className="text-sm text-slate-500 font-medium">English</span>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><Moon className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Dark Mode</span></div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only peer" 
-                            checked={darkMode}
-                            onChange={toggleDarkMode}
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-800"></div>
-                        </label>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><Bell className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Push Notifications</span></div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={pushNotifications}
-                            onChange={togglePush}
-                            className="sr-only peer" 
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-800"></div>
-                        </label>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><Mail className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Marketing Emails</span></div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={marketingEmails}
-                            onChange={toggleMarketing}
-                            className="sr-only peer" 
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-800"></div>
-                        </label>
-                      </div>
-                      <div className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition-colors" onClick={toggleLocation}>
-                        <div className="flex items-center"><MapPin className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Location Permissions</span></div>
-                        {locationGranted ? (
-                          <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-600 rounded-md">Granted</span>
-                        ) : (
-                          <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-md">Request Access</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sustainability & Support */}
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Sustainability & Support</h4>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div onClick={() => setShowDonateModal(true)} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><HeartHandshake className="w-5 h-5 text-teal-500 mr-4" /><span className="font-bold text-slate-700">Donate Reward Points to NGO</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div onClick={() => setShowFAQModal(true)} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><HelpCircle className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Help Center & FAQs</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div onClick={() => setShowComplaintModal(true)} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><MessageSquare className="w-5 h-5 text-amber-500 mr-4" /><span className="font-bold text-slate-700">Report an Issue</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div onClick={() => setShowTermsModal(true)} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition-colors">
-                        <div className="flex items-center"><FileText className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Terms & Privacy Policy</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Data & Actions */}
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Data & Actions</h4>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div onClick={handleDownloadData} className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors">
-                        <div className="flex items-center"><Download className="w-5 h-5 text-slate-400 mr-4" /><span className="font-bold text-slate-700">Download My Data</span></div>
-                        <ChevronRight className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div 
-                        onClick={handleLogout}
-                        className="p-4 hover:bg-red-50 cursor-pointer flex items-center justify-between border-b border-slate-50 transition-colors"
-                      >
-                        <div className="flex items-center"><LogOut className="w-5 h-5 text-red-500 mr-4" /><span className="font-bold text-red-600">Logout</span></div>
-                      </div>
-                      <div className="p-4 hover:bg-red-50 cursor-pointer flex items-center justify-between transition-colors">
-                        <div className="flex items-center"><Trash2 className="w-5 h-5 text-red-500 mr-4" /><span className="font-bold text-red-600">Delete Account</span></div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            )}
-
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Password Change Modal */}
+             )}
+           </div>
+         </motion.div>
+      )}
+      
+      {/* Modals */}
       <AnimatePresence>
         {showPasswordModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
-            >
-              <button 
-                onClick={() => setShowPasswordModal(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6">
-                <Lock className="w-6 h-6" />
-              </div>
-              
-              <h3 className="text-2xl font-black text-slate-900 mb-2">Change Password</h3>
-              <p className="text-slate-500 text-sm mb-6">Enter a new secure password for your account.</p>
-              
-              <form onSubmit={handlePasswordChange} className="space-y-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+              <button onClick={() => setShowPasswordModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center mb-4"><Lock className="w-5 h-5" /></div>
+              <h3 className="text-xl font-black text-slate-900 mb-1">Change Password</h3>
+              <p className="text-slate-500 text-xs mb-6">Enter a new secure password for your account.</p>
+              <form onSubmit={handlePasswordChange} className="space-y-3">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Current Password</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Current Password</label>
                   <div className="relative">
-                    <input 
-                      type={showCurrentPassword ? "text" : "password"} 
-                      required
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      placeholder="Enter current password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                    <input type={showCurrentPassword ? "text" : "password"} required value={passwordData.currentPassword} onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})} className="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900" placeholder="Current password" />
+                    <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><Eye className="w-4 h-4" /></button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">New Password</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">New Password</label>
                   <div className="relative">
-                    <input 
-                      type={showNewPassword ? "text" : "password"} 
-                      required
-                      minLength="6"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="Enter new password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                    <input type={showNewPassword ? "text" : "password"} required minLength="6" value={passwordData.newPassword} onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})} className="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="New password" />
+                    <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><Eye className="w-4 h-4" /></button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Confirm New Password</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Confirm New Password</label>
                   <div className="relative">
-                    <input 
-                      type={showConfirmPassword ? "text" : "password"} 
-                      required
-                      minLength="6"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="Confirm new password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                    <input type={showConfirmPassword ? "text" : "password"} required minLength="6" value={passwordData.confirmPassword} onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})} className="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Confirm password" />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400"><Eye className="w-4 h-4" /></button>
                   </div>
                 </div>
-                
-                <button 
-                  type="submit" 
-                  disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                  className="w-full mt-4 bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                >
+                <button type="submit" disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="w-full mt-2 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-slate-800 disabled:opacity-70">
                   {passwordLoading ? 'Updating...' : 'Update Password'}
                 </button>
               </form>
@@ -1160,325 +826,100 @@ const Profile = () => {
         )}
       </AnimatePresence>
 
-      {/* Address Modal */}
       <AnimatePresence>
         {addressModal.show && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
-            >
-              <button 
-                onClick={() => setAddressModal({ show: false, mode: 'add', id: null, type: '', text: '' })}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <h3 className="text-2xl font-black text-slate-900 mb-6">{addressModal.mode === 'edit' ? 'Edit Address' : 'Add New Address'}</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Address Label (Home, Work, etc.)</label>
-                  <input 
-                    type="text" 
-                    value={addressModal.type}
-                    onChange={(e) => setAddressModal({...addressModal, type: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    placeholder="e.g. Gym"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
-                  <textarea 
-                    value={addressModal.text}
-                    onChange={(e) => setAddressModal({...addressModal, text: e.target.value})}
-                    rows="3"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
-                    placeholder="Enter complete address..."
-                  ></textarea>
-                </div>
-                
-                <button 
-                  onClick={saveAddress}
-                  className="w-full mt-4 bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors"
-                >
-                  Save Address
-                </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+              <button onClick={() => setAddressModal({ show: false, mode: 'add', id: null, type: '', text: '' })} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <h3 className="text-xl font-black text-slate-900 mb-4">{addressModal.mode === 'edit' ? 'Edit Address' : 'Add Address'}</h3>
+              <div className="space-y-3">
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Label (Home, Work, etc.)</label><input type="text" value={addressModal.type} onChange={(e) => setAddressModal({...addressModal, type: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="e.g. Gym" /></div>
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Full Address</label><textarea value={addressModal.text} onChange={(e) => setAddressModal({...addressModal, text: e.target.value})} rows="3" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm resize-none" placeholder="Enter complete address..."></textarea></div>
+                <button onClick={saveAddress} className="w-full mt-2 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm">Save Address</button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Confirm Modal */}
       <AnimatePresence>
         {confirmModal.show && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center"
-            >
-              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">Confirm Deletion</h3>
-              <p className="text-slate-500 mb-8">{confirmModal.message}</p>
-              
-              <div className="flex space-x-3">
-                <button 
-                  onClick={() => setConfirmModal({ show: false, message: '', onConfirm: null })}
-                  className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={confirmModal.onConfirm}
-                  className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30"
-                >
-                  Yes, Delete
-                </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-xs w-full shadow-2xl relative text-center">
+              <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3"><Trash2 className="w-6 h-6" /></div>
+              <h3 className="text-lg font-black text-slate-900 mb-1">Confirm</h3>
+              <p className="text-slate-500 text-sm mb-6">{confirmModal.message}</p>
+              <div className="flex space-x-2">
+                <button onClick={() => setConfirmModal({ show: false, message: '', onConfirm: null })} className="flex-1 py-2.5 bg-slate-100 text-slate-700 font-bold text-sm rounded-lg">Cancel</button>
+                <button onClick={confirmModal.onConfirm} className="flex-1 py-2.5 bg-red-500 text-white font-bold text-sm rounded-lg">Delete</button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Donate Modal */}
       <AnimatePresence>
         {showDonateModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
-            >
-              <button 
-                onClick={() => setShowDonateModal(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <div className="w-12 h-12 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6">
-                <HeartHandshake className="w-6 h-6" />
-              </div>
-              
-              <h3 className="text-2xl font-black text-slate-900 mb-2">Donate Points</h3>
-              <p className="text-slate-500 text-sm mb-6">Support partnered NGOs by donating your reward points. 100 points provides 1 fresh meal to someone in need.</p>
-              
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6 flex justify-between items-center">
-                <span className="font-bold text-slate-700">Available Balance:</span>
-                <span className="font-black text-teal-600 text-lg">{impactData.rewardPoints} Points</span>
-              </div>
-              
-              <button 
-                onClick={handleDonatePoints}
-                className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-md"
-              >
-                Donate 100 Points
-              </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+              <button onClick={() => setShowDonateModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <div className="w-10 h-10 bg-teal-50 text-teal-500 rounded-xl flex items-center justify-center mb-4"><HeartHandshake className="w-5 h-5" /></div>
+              <h3 className="text-xl font-black text-slate-900 mb-1">Donate Points</h3>
+              <p className="text-slate-500 text-xs mb-4">Support partnered NGOs. 100 points = 1 fresh meal.</p>
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-4 flex justify-between items-center"><span className="font-bold text-slate-700 text-sm">Balance:</span><span className="font-black text-teal-600">{impactData.rewardPoints} pts</span></div>
+              <button onClick={handleDonatePoints} className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm">Donate 100 Points</button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* FAQ Modal */}
       <AnimatePresence>
         {showFAQModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative max-h-[80vh] overflow-y-auto"
-            >
-              <button 
-                onClick={() => setShowFAQModal(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <h3 className="text-2xl font-black text-slate-900 mb-6">Help Center & FAQs</h3>
-              
-              <div className="space-y-4">
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <h4 className="font-bold text-slate-900 mb-2">How does FlashFood work?</h4>
-                  <p className="text-slate-600 text-sm leading-relaxed">Merchants list their surplus food at a steep discount just before closing. You purchase the food through the app, wait for the designated pickup time, and head to the store to collect your meal.</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <h4 className="font-bold text-slate-900 mb-2">Are the meals fresh?</h4>
-                  <p className="text-slate-600 text-sm leading-relaxed">Absolutely! All listed food is perfectly good to eat, made on the same day. It's simply surplus food that didn't sell during peak hours.</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <h4 className="font-bold text-slate-900 mb-2">What if the merchant cancels my order?</h4>
-                  <p className="text-slate-600 text-sm leading-relaxed">In the rare event a merchant runs out of food and cancels, you will receive a full refund instantly, along with bonus reward points for the inconvenience.</p>
-                </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl relative max-h-[80vh] overflow-y-auto">
+              <button onClick={() => setShowFAQModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <h3 className="text-xl font-black text-slate-900 mb-4">Help Center & FAQs</h3>
+              <div className="space-y-3">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 className="font-bold text-slate-900 text-sm mb-1">How does FlashFood work?</h4><p className="text-slate-600 text-xs">Merchants list their surplus food at a steep discount just before closing. You purchase it, wait for pickup time, and collect.</p></div>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 className="font-bold text-slate-900 text-sm mb-1">Are the meals fresh?</h4><p className="text-slate-600 text-xs">Absolutely! All listed food is perfectly good to eat, made on the same day.</p></div>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 className="font-bold text-slate-900 text-sm mb-1">What if order cancels?</h4><p className="text-slate-600 text-xs">You receive a full refund instantly, along with bonus points.</p></div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Terms Modal */}
+      <AnimatePresence>
+        {showComplaintModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+              <button onClick={() => setShowComplaintModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <h3 className="text-xl font-black text-slate-900 mb-4">Send Feedback</h3>
+              <form onSubmit={handleSubmitComplaint} className="space-y-3">
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Subject</label><input type="text" required value={complaintData.subject} onChange={(e) => setComplaintData({...complaintData, subject: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Brief subject" /></div>
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Description</label><textarea required value={complaintData.description} onChange={(e) => setComplaintData({...complaintData, description: e.target.value})} rows="4" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm resize-none" placeholder="Tell us what happened..."></textarea></div>
+                <button type="submit" disabled={complaintLoading} className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm">{complaintLoading ? 'Sending...' : 'Submit'}</button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showTermsModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative max-h-[80vh] overflow-y-auto"
-            >
-              <button 
-                onClick={() => setShowTermsModal(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <h3 className="text-2xl font-black text-slate-900 mb-6">Terms & Privacy Policy</h3>
-              
-              <div className="prose prose-sm text-slate-600 max-w-none">
-                <h4 className="font-bold text-slate-900">1. Acceptance of Terms</h4>
-                <p className="mb-4">By accessing and using FlashFood, you agree to be bound by these Terms of Service. All purchases are final unless canceled by the merchant.</p>
-                
-                <h4 className="font-bold text-slate-900">2. Privacy Policy</h4>
-                <p className="mb-4">We take your privacy seriously. Your personal information, including location data and payment details, is encrypted. We do not sell your data to third parties.</p>
-                
-                <h4 className="font-bold text-slate-900">3. User Conduct</h4>
-                <p className="mb-4">Users agree to show up during the designated pickup window. Failure to pick up food repeatedly may result in account suspension to prevent food waste.</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl relative max-h-[80vh] overflow-y-auto">
+              <button onClick={() => setShowTermsModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full"><X className="w-4 h-4" /></button>
+              <h3 className="text-xl font-black text-slate-900 mb-4">Terms & Privacy</h3>
+              <div className="prose prose-sm text-slate-600">
+                <h4 className="font-bold text-slate-900 text-sm">1. Acceptance of Terms</h4><p className="text-xs mb-3">By accessing FlashFood, you agree to these Terms. Purchases are final.</p>
+                <h4 className="font-bold text-slate-900 text-sm">2. Privacy Policy</h4><p className="text-xs mb-3">Your info is encrypted. We don't sell data.</p>
+                <h4 className="font-bold text-slate-900 text-sm">3. User Conduct</h4><p className="text-xs">Show up for pickup. Failure may result in suspension.</p>
               </div>
-              
-              <button 
-                onClick={() => setShowTermsModal(false)}
-                className="w-full mt-8 bg-slate-100 text-slate-900 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors"
-              >
-                I Understand
-              </button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Creative Location Scanner Modal */}
-      <AnimatePresence>
-        {showLocationModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden flex flex-col items-center text-center"
-            >
-              <button 
-                onClick={() => setShowLocationModal(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors z-10"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              {locationStatus === 'idle' && (
-                <>
-                  <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6 relative">
-                    <MapPin className="w-10 h-10" />
-                    <div className="absolute inset-0 border-4 border-blue-100 rounded-full scale-125"></div>
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 mb-2">Enable Location</h3>
-                  <p className="text-slate-500 text-sm mb-8">We need your location to scan for the best FlashFood deals near you instantly.</p>
-                  <button 
-                    onClick={requestLocation}
-                    className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30"
-                  >
-                    Sync My Location
-                  </button>
-                </>
-              )}
-
-              {locationStatus === 'scanning' && (
-                <div className="py-8 flex flex-col items-center">
-                  <div className="relative w-24 h-24 mb-8">
-                    <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-75"></div>
-                    <div className="absolute inset-2 bg-blue-200 rounded-full animate-pulse"></div>
-                    <div className="absolute inset-4 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/50">
-                      <Globe className="w-8 h-8 text-white animate-spin" style={{ animationDuration: '3s' }} />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">Scanning Satellites...</h3>
-                  <p className="text-slate-400 text-sm">Pinpointing your coordinates</p>
-                </div>
-              )}
-
-              {locationStatus === 'success' && (
-                <div className="py-8 flex flex-col items-center">
-                  <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner"
-                  >
-                    <CheckCircle className="w-12 h-12" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">Location Synced!</h3>
-                  <p className="text-slate-400 text-sm">You'll now see localized deals.</p>
-                </div>
-              )}
-
-              {locationStatus === 'error' && (
-                <div className="py-8 flex flex-col items-center">
-                  <div className="w-24 h-24 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-6">
-                    <XCircle className="w-12 h-12" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">Access Denied</h3>
-                  <p className="text-slate-400 text-sm mb-6">Please allow location tracking in your browser popup to continue.</p>
-                  <button 
-                    onClick={() => setLocationStatus('idle')}
-                    className="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
     </div>
   );
 };

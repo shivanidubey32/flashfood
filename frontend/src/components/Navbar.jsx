@@ -60,13 +60,6 @@ const Navbar = () => {
                   <LayoutDashboard className="w-5 h-5" />
                   <span>Dashboard</span>
                 </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="p-2 text-slate-400 hover:text-[#d2642b] transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
               </div>
             ) : (
               <Link to="/login" className="flex items-center space-x-2 bg-[#d2642b] text-white px-4 py-2 rounded-full hover:bg-[#b85422] transition-colors shadow-lg shadow-[#d2642b]/30">

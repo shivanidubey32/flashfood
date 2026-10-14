@@ -139,7 +139,7 @@ const Explore = () => {
     }
 
     return result;
-  }, [listings, searchTerm, activeFilter, advancedFilters]);
+  }, [listings, searchTerm, activeFilter, advancedFilters, wishlist]);
 
   const filterChips = [
     'All Deals',

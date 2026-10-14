@@ -1,5 +1,7 @@
 import asyncHandler from '../middlewares/asyncHandler.js';
 import Donation from '../models/Donation.js';
+import Notification from '../models/Notification.js';
+import User from '../models/User.js';
 
 // @desc    Create a new donation
 // @route   POST /api/donations
@@ -55,9 +57,23 @@ export const claimDonation = asyncHandler(async (req, res) => {
 
     const updatedDonation = await donation.save();
     
-    // Notify merchant via socket
-    if (req.io) {
-      req.io.emit(`donation-claimed-${donation.merchant}`, updatedDonation);
+    const merchantUser = await User.findById(donation.merchant);
+    const sendDonationAlerts = merchantUser?.notificationPreferences?.donationAlerts !== false;
+    
+    if (sendDonationAlerts) {
+      // Notify merchant via socket
+      if (req.io) {
+        req.io.emit(`donation-claimed-${donation.merchant}`, updatedDonation);
+      }
+      
+      // Notify merchant via DB
+      await Notification.create({
+        recipient: donation.merchant,
+        type: 'New_Donation',
+        title: 'Donation Claimed!',
+        message: `An NGO has claimed your donation: ${updatedDonation.title}.`,
+        relatedId: updatedDonation._id
+      });
     }
     
     res.json(updatedDonation);
@@ -117,6 +133,6 @@ export const getMyClaimedDonations = asyncHandler(async (req, res) => {
 // @access  Private/Merchant
 export const getMerchantDonations = asyncHandler(async (req, res) => {
   const donations = await Donation.find({ merchant: req.user._id }).sort({ createdAt: -1 })
-    .populate('claimedBy', 'name email');
+    .populate('claimedBy', 'name email businessName');
   res.json(donations);
 });
