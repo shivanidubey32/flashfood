@@ -5,6 +5,7 @@ import {
   Lightbulb, Globe, TrendingDown, Clock, ArrowRight 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 // Animated Counter Component
 const Counter = ({ end, suffix = "", duration = 2 }) => {
@@ -48,6 +49,9 @@ const RevealSection = ({ children, className = "" }) => {
 const About = () => {
   return (
     <div className="w-full bg-slate-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={[{ label: 'Home', path: '/' }, { label: 'About Us' }]} />
+      </div>
       
       {/* 1. Hero Section */}
       <section 

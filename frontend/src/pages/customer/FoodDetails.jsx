@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ListingCard from '../../components/ListingCard';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const FoodDetails = () => {
   const { id } = useParams();
@@ -319,6 +320,16 @@ const FoodDetails = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: location.pathname.startsWith('/customer') ? '/customer/explore' : '/' },
+          { label: 'Explore Food', path: location.pathname.startsWith('/customer') ? '/customer/explore' : '/explore' },
+          { label: listing?.title || (loading ? 'Loading food...' : 'Food Details') }
+        ]}
+      />
 
       {/* Back Button */}
       <div className="mb-6 flex items-center justify-between">

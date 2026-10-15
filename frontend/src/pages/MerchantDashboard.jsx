@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { PlusCircle, Package, TrendingUp, Clock, FileText, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API from '../api/axios';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const MerchantDashboard = () => {
   const [listings, setListings] = useState([]);
@@ -60,6 +61,7 @@ const MerchantDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      <Breadcrumbs className="mb-4" items={[{ label: 'Home', path: '/' }, { label: 'Merchant Dashboard' }]} />
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Merchant Dashboard</h1>

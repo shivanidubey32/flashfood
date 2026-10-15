@@ -4,6 +4,7 @@ import { Heart, Loader, CheckCircle, Search, MapPin, Loader2 } from 'lucide-reac
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ListingCard from '../../components/ListingCard';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Wishlist = () => {
   const [listings, setListings] = useState([]);
@@ -71,6 +72,15 @@ const Wishlist = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Wishlist' }
+        ]}
+      />
 
       <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight flex items-center">
         Your Wishlist <Heart className="ml-3 w-8 h-8 text-red-500 fill-red-500" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Leaf, Award, IndianRupee, TreePine, Loader2 } from 'lucide-react';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Impact = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -61,6 +62,15 @@ const Impact = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'My Impact' }
+        ]}
+      />
+
       <div className="flex items-center space-x-3 mb-8">
         <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
           <Leaf className="w-6 h-6 text-green-600" />

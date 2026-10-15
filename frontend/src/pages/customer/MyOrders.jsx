@@ -6,6 +6,7 @@ import {
   ChefHat, XCircle, QrCode, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 // In production, this should point to your deployed URL
 const socket = io(import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000'));
@@ -134,6 +135,15 @@ const MyOrders = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'My Orders' }
+        ]}
+      />
+
       <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Order Tracking</h1>
 
       {orders.length === 0 ? (

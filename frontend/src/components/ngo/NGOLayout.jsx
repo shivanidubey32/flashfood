@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Logo from '../Logo';
+import Breadcrumbs from '../Breadcrumbs';
 
 const NGOLayout = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const NGOLayout = () => {
 
         {/* Main Content Area */}
         <main className="p-4 sm:p-6 pb-24">
+          <Breadcrumbs className="mb-4" />
           <Outlet />
         </main>
       </div>

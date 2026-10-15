@@ -5,6 +5,7 @@ import {
   Utensils, Coffee, Croissant, ShoppingCart, Home,
   ArrowRight, CheckCircle2
 } from 'lucide-react';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const Partner = () => {
   const [toast, setToast] = useState({ show: false, message: '' });
@@ -18,6 +19,9 @@ const Partner = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Breadcrumbs items={[{ label: 'Home', path: '/' }, { label: 'Partner with Us' }]} />
+      </div>
       {/* Hero Section */}
       <div className="bg-slate-900 text-white py-20 px-4 text-center">
         <motion.h1 

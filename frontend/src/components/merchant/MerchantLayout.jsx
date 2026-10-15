@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Logo from '../Logo';
 import NotificationsPanel from '../../pages/merchant/Notifications';
+import Breadcrumbs from '../Breadcrumbs';
 
 const MerchantLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -215,6 +216,7 @@ const MerchantLayout = () => {
           </AnimatePresence>
           
           <div className="p-4 sm:p-6 lg:p-8 min-h-full">
+            <Breadcrumbs className="mb-4" />
             <Outlet />
           </div>
         </main>

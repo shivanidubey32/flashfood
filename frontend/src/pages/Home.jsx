@@ -1,12 +1,16 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, MapPin, Tag, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const Home = () => {
   return (
     <div className="w-full bg-white font-sans overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={[{ label: 'Home' }]} />
+      </div>
       {/* Hero Section */}
-      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-20">
+      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-10">
         
         {/* Background Sweeping SVG Lines */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">

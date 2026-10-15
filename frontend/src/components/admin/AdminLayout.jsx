@@ -15,6 +15,7 @@ import {
   LogOut,
   ShieldCheck
 } from 'lucide-react';
+import Breadcrumbs from '../Breadcrumbs';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -106,6 +107,7 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 bg-slate-50 relative">
+        <Breadcrumbs className="mb-6" />
         <Outlet />
       </main>
       

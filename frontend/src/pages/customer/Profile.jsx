@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -417,6 +418,27 @@ const Profile = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4 max-w-4xl mx-auto"
+        items={
+          activeTab === 'menu' 
+            ? [{ label: 'Home', path: '/' }, { label: 'My Profile' }]
+            : [
+                { label: 'Home', path: '/' }, 
+                { label: 'My Profile', path: '/customer/profile' },
+                { 
+                  label: activeTab === 'personal' ? 'Personal Details' : 
+                         activeTab === 'addresses' ? 'Saved Addresses' :
+                         activeTab === 'orders' ? 'Order History' :
+                         activeTab === 'impact' ? 'Impact & Rewards' :
+                         activeTab === 'favorites' ? 'Favorite Stores' :
+                         activeTab === 'settings' ? 'App Settings' : activeTab 
+                }
+              ]
+        }
+      />
 
       {/* Main Menu View */}
       {activeTab === 'menu' && (

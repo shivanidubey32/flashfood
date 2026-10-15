@@ -3,6 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Trash2, ArrowRight, ShoppingBag, CheckCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -57,6 +58,15 @@ const Cart = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Cart' }
+        ]}
+      />
 
       <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Your Cart</h1>
       

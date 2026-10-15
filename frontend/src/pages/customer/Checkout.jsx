@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ShieldCheck, MapPin, CreditCard, CheckCircle, Loader2, XCircle, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -136,6 +137,16 @@ const Checkout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Cart', path: '/customer/cart' },
+          { label: 'Checkout' }
+        ]}
+      />
 
       <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Checkout</h1>
 

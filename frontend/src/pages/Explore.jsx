@@ -3,6 +3,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import ListingCard from '../components/ListingCard';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { Search, Filter, Map as MapIcon, X, MapPin, Navigation } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -198,6 +199,19 @@ const Explore = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Home', path: location.pathname.startsWith('/customer') ? '/customer/explore' : '/' },
+          { 
+            label: 'Explore Food', 
+            path: activeFilter !== 'All Deals' ? (location.pathname.startsWith('/customer') ? '/customer/explore' : '/explore') : undefined 
+          },
+          ...(activeFilter !== 'All Deals' ? [{ label: activeFilter }] : [])
+        ]}
+      />
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Explore Nearby Deals</h1>
