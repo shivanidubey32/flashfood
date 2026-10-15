@@ -58,7 +58,6 @@ const MyOrders = () => {
       case 'Ready': return <Package className="w-5 h-5 text-green-500 animate-pulse" />;
       case 'Completed': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
       case 'Cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'Cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
       default: return <Clock className="w-5 h-5 text-slate-500" />;
     }
   };
@@ -103,13 +102,30 @@ const MyOrders = () => {
       alert("Review submitted successfully! Thank you.");
     } catch (error) {
       console.error(error);
-      if (error.response?.data?.message === 'You have already reviewed this order') {
+      if (error.response?.data?.message?.includes('already submitted') || error.response?.data?.message?.includes('already reviewed')) {
         setReviewedOrders(prev => [...prev, reviewModal.orderId]);
         alert("You have already reviewed this order.");
       } else {
-        alert("Failed to submit review.");
+        alert(error.response?.data?.message || "Failed to submit review.");
       }
       setReviewModal({ show: false, orderId: null, listingId: null, rating: 5, comment: '' });
+    }
+  };
+
+  const cancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order? The items will be returned to the store's inventory.")) return;
+    try {
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data } = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000')}/api/orders/${orderId}/cancel`,
+        {},
+        config
+      );
+      setOrders(prev => prev.map(o => o._id === orderId ? data : o));
+      alert("Order cancelled successfully. Stock has been returned to the store.");
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to cancel order.");
     }
   };
 
@@ -191,6 +207,15 @@ const MyOrders = () => {
                       Leave a Review
                     </button>
                   )
+                )}
+
+                {['Pending', 'Accepted'].includes(order.status) && (
+                  <button 
+                    onClick={() => cancelOrder(order._id)}
+                    className="w-full mt-3 text-xs font-semibold text-red-600 hover:text-red-700 transition-colors border border-red-200 py-2 rounded-xl hover:bg-red-50"
+                  >
+                    Cancel Order
+                  </button>
                 )}
               </div>
             </div>

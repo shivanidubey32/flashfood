@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, Edit, Trash2, Tag, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Clock, Edit, Trash2, CheckCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API from '../../api/axios';
 
@@ -58,10 +58,12 @@ const MyListings = () => {
 
   const markSoldOut = async (id) => {
     try {
-      setListings(listings.map(l => l._id === id ? { ...l, status: 'Unavailable' } : l));
-      showToast(`Listing marked as Sold Out locally.`);
+      await API.put(`/listings/${id}/status`, { status: 'Sold Out', quantityAvailable: 0 });
+      setListings(listings.map(l => l._id === id ? { ...l, status: 'Sold Out', quantityAvailable: 0 } : l));
+      showToast(`Listing marked as Sold Out.`);
     } catch (error) {
       console.error(error);
+      showToast('Failed to update listing status.', 'error');
     }
   };
 

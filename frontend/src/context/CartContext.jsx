@@ -17,15 +17,21 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   const addToCart = (item, quantity = 1) => {
+    const maxAvailable = item.quantityAvailable !== undefined ? item.quantityAvailable : (item.quantity ?? 99);
+    if (maxAvailable <= 0) {
+      return false;
+    }
     setCartItems(prev => {
       const existingItem = prev.find(i => i._id === item._id);
       if (existingItem) {
         // Increase quantity up to available limit
-        const newQuantity = Math.min(existingItem.cartQuantity + quantity, item.quantity);
-        return prev.map(i => i._id === item._id ? { ...i, cartQuantity: newQuantity } : i);
+        const newQuantity = Math.min(existingItem.cartQuantity + quantity, maxAvailable);
+        return prev.map(i => i._id === item._id ? { ...i, cartQuantity: newQuantity, quantityAvailable: maxAvailable } : i);
       }
-      return [...prev, { ...item, cartQuantity: quantity }];
+      const initialQuantity = Math.min(quantity, maxAvailable);
+      return [...prev, { ...item, cartQuantity: initialQuantity, quantityAvailable: maxAvailable }];
     });
+    return true;
   };
 
   const removeFromCart = (itemId) => {
@@ -40,7 +46,8 @@ export const CartProvider = ({ children }) => {
     setCartItems(prev => prev.map(i => {
       if (i._id === itemId) {
         // Ensure they don't add more than available
-        return { ...i, cartQuantity: Math.min(newQuantity, i.quantity || 99) };
+        const maxAvailable = i.quantityAvailable !== undefined ? i.quantityAvailable : (i.quantity ?? 99);
+        return { ...i, cartQuantity: Math.min(newQuantity, maxAvailable) };
       }
       return i;
     }));

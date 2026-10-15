@@ -54,6 +54,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: 'Card',
     },
+    stockRestored: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

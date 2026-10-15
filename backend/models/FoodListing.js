@@ -47,6 +47,14 @@ const foodListingSchema = new mongoose.Schema(
       type: String,
       enum: ['Available', 'Sold Out', 'Expired', 'Donated'],
       default: 'Available',
+    },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      default: 0,
     }
   },
   {

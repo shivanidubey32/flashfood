@@ -58,14 +58,27 @@ export const getMerchantListings = asyncHandler(async (req, res) => {
   const listings = await FoodListing.find({ merchant: req.user._id }).sort({ createdAt: -1 });
   res.json(listings);
 });
-// @desc    Update a listing's status
+// @desc    Update a listing's status or stock
 // @route   PUT /api/listings/:id/status
 // @access  Private/Merchant
 export const updateListingStatus = asyncHandler(async (req, res) => {
   const listing = await FoodListing.findById(req.params.id);
   if (listing && listing.merchant.toString() === req.user._id.toString()) {
-    listing.status = req.body.status || listing.status;
+    if (req.body.status) listing.status = req.body.status;
+    if (req.body.quantityAvailable !== undefined) {
+      listing.quantityAvailable = Math.max(0, Number(req.body.quantityAvailable));
+      if (listing.quantityAvailable === 0) {
+        listing.status = 'Sold Out';
+      }
+    }
     const updatedListing = await listing.save();
+    if (req.io) {
+      req.io.emit('inventory-updated', {
+        listingId: updatedListing._id,
+        quantityAvailable: updatedListing.quantityAvailable,
+        status: updatedListing.status
+      });
+    }
     res.json(updatedListing);
   } else {
     res.status(404);

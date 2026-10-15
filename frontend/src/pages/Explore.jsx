@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import ListingCard from '../components/ListingCard';
 import { Search, Filter, Map as MapIcon, X, MapPin, Navigation } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { DUMMY_ITEMS } from '../utils/dummyData';
+import { Link, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -39,6 +39,9 @@ const createCustomIcon = (price) => {
 const MAP_CENTER = [28.6139, 77.2090];
 
 const Explore = () => {
+  const location = useLocation();
+  const searchContainerRef = useRef(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
@@ -47,6 +50,16 @@ const Explore = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All Deals');
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   // Advanced Filters State
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -100,6 +113,26 @@ const Explore = () => {
     };
 
     fetchListings();
+  }, []);
+
+  // Real-time inventory and review listener
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+    const socket = io(backendUrl);
+
+    socket.on('inventory-updated', (data) => {
+      if (data && data.listingId) {
+        setListings(prev => prev.map(item => 
+          String(item._id) === String(data.listingId)
+            ? { ...item, quantityAvailable: data.quantityAvailable, status: data.status }
+            : item
+        ));
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   // Filter Logic
@@ -173,15 +206,62 @@ const Explore = () => {
         
         <div className="flex flex-col w-full md:w-auto">
           <div className="flex items-center space-x-4 w-full md:w-auto">
-            <div className="relative flex-grow md:flex-grow-0">
+            <div className="relative flex-grow md:flex-grow-0" ref={searchContainerRef}>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input 
                 type="text" 
                 placeholder="Search food, restaurants..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-shadow"
+                onFocus={() => setIsSearchFocused(true)}
+                className="w-full md:w-64 pl-10 pr-9 py-2 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-shadow text-sm"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Instant Search Suggestions Dropdown */}
+              {searchTerm.trim() && isSearchFocused && (
+                <div className="absolute left-0 right-0 md:w-80 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 max-h-80 overflow-y-auto">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-50">
+                    <span>Quick Deals ({filteredListings.length})</span>
+                    <span className="text-[10px] text-slate-400 font-normal">Click to view</span>
+                  </div>
+                  {filteredListings.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-500 font-medium">
+                      No matching food found
+                    </div>
+                  ) : (
+                    filteredListings.slice(0, 6).map(item => (
+                      <Link
+                        key={item._id}
+                        to={location.pathname.startsWith('/customer') ? `/customer/food/${item._id}` : `/food/${item._id}`}
+                        onClick={() => setIsSearchFocused(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group"
+                      >
+                        <img 
+                          src={item.image ? (item.image.startsWith('http') ? item.image : ((import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000')) + item.image)) : (item.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000')} 
+                          alt={item.title}
+                          className="w-10 h-10 rounded-xl object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-xs text-slate-900 group-hover:text-red-500 truncate transition-colors">{item.title}</p>
+                          <p className="text-[11px] text-slate-500 truncate">{item.merchant?.businessName || item.merchant?.name || 'Local Store'}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-black text-red-500 text-xs">₹{item.discountedPrice}</span>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
             <button 
               onClick={() => setIsFilterModalOpen(true)}
